@@ -1,0 +1,265 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#ifndef APSTUDIO_INVOKED
+#include "targetver.h"
+#endif
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// 한국어(대한민국) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)
+LANGUAGE LANG_KOREAN, SUBLANG_DEFAULT
+#pragma code_page(949)
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#ifndef APSTUDIO_INVOKED\r\n"
+    "#include ""targetver.h""\r\n"
+    "#endif\r\n"
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)\r\n"
+    "LANGUAGE 18, 1\r\n"
+    "#pragma code_page(949)\r\n"
+    "#include ""res\\Router.rc2""  // Microsoft Visual C++ AI¡E￠cE￠®EcE?UAC ¡E￠cE￠®EcE¡E￠cE￠®EcIU¡E￠cE￠®EcE¡E￠cE￠®Ec￠®¡×I¡E￠c¡§I￠®E¡EcE¡E￠cEcI ¡E￠cE￠®EcIi¡E￠cE￠®EcIi￠®E¡EcE¡E￠cEc￠®E¡Ec¡E￠c￠®￠?u¡E￠cE￠®EcE¡E￠cE￠®Ec￠®¡×I¡E￠c¡§I¡E￠cE￠®EcE?¡E￠cE￠®EcE￠®E¡EcEc¡E￠cE￠®Ec￠®E¡Ec¡E￠c¡E?u￠®E¡EcE¡E￠cEc￠®E¡Ec¡E￠c￠®￠?I ¡E￠cE￠®Ec￠®E¡Ec¡E￠c¡E?￠®E¡EcE¡E￠cEciAyCN ¡E￠cE￠®EcE¡E￠cE￠®Ec￠®¡×I¡E￠c¡§I¡E￠cE￠®EcEc¡E￠cE￠®Ec￠®E¡Ec¡E￠c¡E?uO¡E￠cE￠®Ec￠®E¡Ec¡E￠c¡E?o¡E￠cE￠®Ec￠®E¡Ec¡E￠c¡E?¡E￠cE￠®Ec￠®¡×I¡E￠c¡§IAO¡E￠cE￠®EcE¡E￠cE￠®EcII¡E￠cE￠®EcE¡E￠cE￠®EcIU.\r\n"
+    "#include ""l.KOR\\afxres.rc""      // C￠®E¡EcE¡E￠cEcIA¡E￠cE￠®Ec￠®E¡Ec¡E￠c¡E?￠®E¡Ec¡E￠c￠®￠?￠®E¡EcI ￠®E¡EcE¡E￠cEc￠®E¡Ec¡E￠c￠®￠?u¡E￠cE￠®EcE¡E￠cE￠®Ec￠®¡×I¡E￠c¡§I¡E￠cE￠®Ec￠®E¡Ec¡E￠c¡E?u¡E￠cE￠®Ec￠®E¡Ec¡E￠c¡E?¡E￠cE￠®Ec￠®¡×I¡E￠c¡§I ¡E￠cE￠®EcE?a¡E￠cE￠®Ec￠®E¡Ec¡E￠c¡E?uOAO¡E￠cE￠®EcE¡E￠cE￠®EcII¡E￠cE￠®EcE¡E￠cE￠®EcIU.\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 170, 62
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "StaticRouter 정보"
+FONT 9, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    ICON            128,IDC_STATIC,14,14,20,20
+    LTEXT           "StaticRouter",IDC_STATIC,42,14,114,8,SS_NOPREFIX
+    LTEXT           "Copyright (C) 2016",IDC_STATIC,42,26,114,8
+    DEFPUSHBUTTON   "확인",IDOK,113,41,50,14,WS_GROUP
+END
+
+IDD_STATICROUTER_DIALOG DIALOGEX 0, 0, 555, 338
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "DynamicRouter"
+FONT 9, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    PUSHBUTTON      "종료",IDCANCEL,490,311,50,14
+    CONTROL         "",IDC_CACHE_TABLE,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,356,22,174,78
+    CONTROL         "",IDC_PROXY_TABLE,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,358,142,174,130
+    GROUPBOX        "ARP Cache Table",IDC_STATIC,348,11,191,115
+    PUSHBUTTON      "Delete",IDC_CACHE_DELETE,372,104,52,14
+    PUSHBUTTON      "Delete All",IDC_CACHE_DELETE_ALL,464,104,50,14
+    GROUPBOX        "ICMP Table",IDC_STATIC,348,129,191,173
+    PUSHBUTTON      "Delete",IDC_PROXY_DELETE,421,279,50,14
+    PUSHBUTTON      "Delete All",IDC_PROXY_DELETE_ALL,482,279,50,14
+    PUSHBUTTON      "Add",IDC_PROXY_ADD,358,279,50,14
+    CONTROL         "",IDC_ROUTING_TABLE,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,23,144,309,155
+    GROUPBOX        "NAT Table",IDC_STATIC,15,128,325,175
+    COMBOBOX        IDC_NIC1_COMBO,64,24,267,47,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_NIC2_COMBO,64,69,267,52,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Private NIC",IDC_NIC2,24,70,41,14
+    LTEXT           "Public NIC",IDC_NIC1,24,25,39,14
+    GROUPBOX        "Settings",IDC_STATIC,15,11,325,113
+    PUSHBUTTON      "Set",IDC_NIC_SET_BUTTON,282,105,50,14
+    CONTROL         "",IDC_IPADDRESS1,"SysIPAddress32",WS_TABSTOP,64,42,100,12
+    CONTROL         "",IDC_IPADDRESS2,"SysIPAddress32",WS_TABSTOP,64,87,100,12
+    LTEXT           "Public IP",IDC_NIC3,24,43,40,14
+    LTEXT           "Private IP",IDC_NIC4,24,88,39,14
+END
+
+IDD_ROUTE_ADD_DLG DIALOGEX 0, 0, 180, 154
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "RoutTableAdder"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "추가",IDOK,39,126,50,14
+    PUSHBUTTON      "취소",IDCANCEL,97,126,50,14
+    LTEXT           "Destination",IDC_STATIC,16,17,37,8
+    LTEXT           "Netmask",IDC_STATIC,16,36,28,8
+    LTEXT           "Gateway",IDC_STATIC,16,55,30,8
+    LTEXT           "Flag",IDC_STATIC,16,73,14,8
+    LTEXT           "Interface",IDC_STATIC,16,91,31,8
+    LTEXT           "Metric",IDC_STATIC,16,110,19,8
+    CONTROL         "",IDC_DESTINATION_IPADDRESS,"SysIPAddress32",WS_TABSTOP,62,14,100,15
+    CONTROL         "",IDC_NETMASK_IPADDRESS,"SysIPAddress32",WS_TABSTOP,62,33,100,15
+    CONTROL         "",IDC_GATEWAY_IPADDRESS,"SysIPAddress32",WS_TABSTOP,62,52,100,15
+    CONTROL         "Up",IDC_UP_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,63,74,25,10
+    CONTROL         "Gateway",IDC_GATEWAY_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,88,74,45,10
+    CONTROL         "Host",IDC_HOST_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,129,74,31,10
+    COMBOBOX        IDC_INTERFACE_COMBO,63,91,99,56,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_METRIC_EDIT,63,109,43,12,ES_AUTOHSCROLL
+END
+
+IDD_PROXY_ADD DIALOGEX 0, 0, 224, 111
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "ProxyTableAdder"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,108,90,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,167,90,50,14
+    COMBOBOX        IDC_COMBO1,65,21,120,70,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "",IDC_IPADDRESS1,"SysIPAddress32",WS_TABSTOP,65,46,119,15
+    LISTBOX         IDC_LIST3,65,70,119,13,LBS_SORT | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Device",IDC_STATIC,20,23,37,11
+    LTEXT           "IP 주소",IDC_STATIC,18,48,37,11
+    LTEXT           "H/W 주소",IDC_STATIC,18,71,40,8
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "041203b5"
+        BEGIN
+            VALUE "CompanyName", "TODO: <회사 이름>"
+            VALUE "FileDescription", "TODO: <파일 설명>"
+            VALUE "FileVersion", "1.0.0.1"
+            VALUE "InternalName", "StaticRouter.exe"
+            VALUE "LegalCopyright", "TODO: (c) <회사 이름>.  All rights reserved."
+            VALUE "OriginalFilename", "StaticRouter.exe"
+            VALUE "ProductName", "TODO: <제품 이름>"
+            VALUE "ProductVersion", "1.0.0.1"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x412, 949
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 163
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 55
+    END
+
+    IDD_STATICROUTER_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 548
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 331
+    END
+
+    IDD_ROUTE_ADD_DLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 173
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 147
+    END
+
+    IDD_PROXY_ADD, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 217
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 104
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE
+BEGIN
+    IDS_ABOUTBOX            "StaticRouter 정보(&A)..."
+END
+
+#endif    // 한국어(대한민국) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)
+LANGUAGE 18, 1
+#pragma code_page(949)
+#include "res\Router.rc2"  // Microsoft Visual C++ AI¡E￠cE￠®EcE?UAC ¡E￠cE￠®EcE¡E￠cE￠®EcIU¡E￠cE￠®EcE¡E￠cE￠®Ec￠®¡×I¡E￠c¡§I￠®E¡EcE¡E￠cEcI ¡E￠cE￠®EcIi¡E￠cE￠®EcIi￠®E¡EcE¡E￠cEc￠®E¡Ec¡E￠c￠®￠?u¡E￠cE￠®EcE¡E￠cE￠®Ec￠®¡×I¡E￠c¡§I¡E￠cE￠®EcE?¡E￠cE￠®EcE￠®E¡EcEc¡E￠cE￠®Ec￠®E¡Ec¡E￠c¡E?u￠®E¡EcE¡E￠cEc￠®E¡Ec¡E￠c￠®￠?I ¡E￠cE￠®Ec￠®E¡Ec¡E￠c¡E?￠®E¡EcE¡E￠cEciAyCN ¡E￠cE￠®EcE¡E￠cE￠®Ec￠®¡×I¡E￠c¡§I¡E￠cE￠®EcEc¡E￠cE￠®Ec￠®E¡Ec¡E￠c¡E?uO¡E￠cE￠®Ec￠®E¡Ec¡E￠c¡E?o¡E￠cE￠®Ec￠®E¡Ec¡E￠c¡E?¡E￠cE￠®Ec￠®¡×I¡E￠c¡§IAO¡E￠cE￠®EcE¡E￠cE￠®EcII¡E￠cE￠®EcE¡E￠cE￠®EcIU.
+#include "l.KOR\afxres.rc"      // C￠®E¡EcE¡E￠cEcIA¡E￠cE￠®Ec￠®E¡Ec¡E￠c¡E?￠®E¡Ec¡E￠c￠®￠?￠®E¡EcI ￠®E¡EcE¡E￠cEc￠®E¡Ec¡E￠c￠®￠?u¡E￠cE￠®EcE¡E￠cE￠®Ec￠®¡×I¡E￠c¡§I¡E￠cE￠®Ec￠®E¡Ec¡E￠c¡E?u¡E￠cE￠®Ec￠®E¡Ec¡E￠c¡E?¡E￠cE￠®Ec￠®¡×I¡E￠c¡§I ¡E￠cE￠®EcE?a¡E￠cE￠®Ec￠®E¡Ec¡E￠c¡E?uOAO¡E￠cE￠®EcE¡E￠cE￠®EcII¡E￠cE￠®EcE¡E￠cE￠®EcIU.
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
