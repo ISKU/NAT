@@ -68,9 +68,6 @@ public:
 	CListCtrl ListBox_ICMPTable;
 	afx_msg void OnBnClickedCacheDelete();
 	afx_msg void OnBnClickedCacheDeleteAll();
-	afx_msg void OnBnClickedProxyDelete();
-	afx_msg void OnBnClickedProxyDeleteAll();
-	afx_msg void OnBnClickedProxyAdd();
 	afx_msg void OnBnClickedCancel();
 	afx_msg void OnBnClickedNicSetButton();
 	afx_msg void OnBnClickedRoutingAdd();
@@ -99,4 +96,5 @@ public:
 	static unsigned int WaitRipResponseMessagePacket_1(LPVOID pParam);
 	static unsigned int WaitRipResponseMessagePacket_2(LPVOID pParam);
 	static unsigned int TableCheck(LPVOID pParam);
+	afx_msg void OnLvnItemchangedIcmpTable(NMHDR *pNMHDR, LRESULT *pResult);
 };

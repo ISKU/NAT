@@ -3,6 +3,7 @@
 #include "RouterDlg.h"
 
 BOOL CICMPLayer::Send(unsigned char* ppayload, int nlength, int dev_num) {
+	return true;
 }
 
 BOOL CICMPLayer::Receive(unsigned char* ppayload, int dev_num) {
@@ -23,6 +24,8 @@ BOOL CICMPLayer::Receive(unsigned char* ppayload, int dev_num) {
 		}
 		Send(ppayload, ICMP_HEADER_SIZE+ICMP_MAX_DATA, 1);
 	}
+
+	return true;
 }
 
 int CICMPLayer::ExistIdentifier(unsigned short identifier) {

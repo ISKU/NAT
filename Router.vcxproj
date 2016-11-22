@@ -127,7 +127,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ICMPLayer.cpp" />
-    <ClCompile Include="ProxyTableAdder.cpp" />
     <ClCompile Include="RIPLayer.cpp" />
     <ClCompile Include="Router.cpp" />
     <ClCompile Include="RouterDlg.cpp" />
@@ -155,7 +154,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ICMPLayer.h" />
-    <ClInclude Include="ProxyTableAdder.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="RIPLayer.h" />
     <ClInclude Include="Router.h" />

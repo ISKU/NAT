@@ -2,7 +2,6 @@
 #include "Router.h"
 #include "RouterDlg.h"
 #include "RoutTableAdder.h"
-#include "ProxyTableAdder.h"
 #include "IPLayer.h"
 
 #include <vector>
@@ -45,8 +44,6 @@ CRouterDlg::CRouterDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CRouterDlg::IDD, pParent), CBaseLayer("CRouterDlg")
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-	//listIndex = -1;
-	//ProxyListIndex = -1;
 	// Layer 생성
 	m_NILayer = new CNILayer("NI");
 	m_EthernetLayer = new CEthernetLayer("Ethernet");
@@ -85,7 +82,7 @@ void CRouterDlg::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_ROUTING_TABLE, ListBox_RoutingTable);
 	DDX_Control(pDX, IDC_CACHE_TABLE, ListBox_ARPCacheTable);
-	DDX_Control(pDX, IDC_PROXY_TABLE, ListBox_ICMPTable);
+	DDX_Control(pDX, IDC_ICMP_TABLE, ListBox_ICMPTable);
 	DDX_Control(pDX, IDC_NIC1_COMBO, m_nic1);
 	DDX_Control(pDX, IDC_NIC2_COMBO, m_nic2);
 	DDX_Control(pDX, IDC_IPADDRESS1, m_nic1_ip);
@@ -98,15 +95,13 @@ BEGIN_MESSAGE_MAP(CRouterDlg, CDialog)
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDC_CACHE_DELETE, &CRouterDlg::OnBnClickedCacheDelete)
 	ON_BN_CLICKED(IDC_CACHE_DELETE_ALL, &CRouterDlg::OnBnClickedCacheDeleteAll)
-	ON_BN_CLICKED(IDC_PROXY_DELETE, &CRouterDlg::OnBnClickedProxyDelete)
-	ON_BN_CLICKED(IDC_PROXY_DELETE_ALL, &CRouterDlg::OnBnClickedProxyDeleteAll)
-	ON_BN_CLICKED(IDC_PROXY_ADD, &CRouterDlg::OnBnClickedProxyAdd)
 	ON_BN_CLICKED(IDCANCEL, &CRouterDlg::OnBnClickedCancel)
 	ON_BN_CLICKED(IDC_NIC_SET_BUTTON, &CRouterDlg::OnBnClickedNicSetButton)
 	ON_CBN_SELCHANGE(IDC_NIC1_COMBO, &CRouterDlg::OnCbnSelchangeNic1Combo)
 	ON_CBN_SELCHANGE(IDC_NIC2_COMBO, &CRouterDlg::OnCbnSelchangeNic2Combo)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_ROUTING_TABLE, &CRouterDlg::OnLvnItemchangedRoutingTable)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_ROUTING_TABLE2, &CRouterDlg::OnLvnItemchangedRoutingTable2)
+	ON_NOTIFY(LVN_ITEMCHANGED, IDC_ICMP_TABLE, &CRouterDlg::OnLvnItemchangedIcmpTable)
 END_MESSAGE_MAP()
 
 // CRouterDlg 메시지 처리기
@@ -223,31 +218,6 @@ void CRouterDlg::OnBnClickedCacheDeleteAll()
 	//CacheDeleteAll버튼
 	m_ARPLayer->Cache_Table.RemoveAll();
 	m_ARPLayer->updateCacheTable();
-}
-
-void CRouterDlg::OnBnClickedProxyDelete()
-{
-}
-
-void CRouterDlg::OnBnClickedProxyDeleteAll()
-{
-}
-
-void CRouterDlg::OnBnClickedProxyAdd()
-{
-	// proxy add 버튼
-	CString str;
-	unsigned char Ip[4];
-	unsigned char Mac[8];
-	ProxyTableAdder PDlg;
-
-	if(	PDlg.DoModal() == IDOK)
-	{
-		str = PDlg.getName();
-		memcpy(Ip , PDlg.getIp() , 4);
-		memcpy(Mac , PDlg.getMac() , 6);
-		// m_ARPLayer->InsertProxy(str,Ip,Mac);
-	}
 }
 
 void CRouterDlg::OnBnClickedCancel()
@@ -521,3 +491,10 @@ unsigned int CRouterDlg::TableCheck(LPVOID pParam){
 	return 0;
 }
 ///////////////////////////////////////////////////////////////////////////////////
+
+void CRouterDlg::OnLvnItemchangedIcmpTable(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	*pResult = 0;
+}
