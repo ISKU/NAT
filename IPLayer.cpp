@@ -128,7 +128,7 @@ BOOL CIPLayer::Send(unsigned char* ppayload, int nlength, int dev_num)
 	Ip_header.Ip_checksum = htons(SetChecksum((unsigned char*)&Ip_header));
 
 	
-	BOOL bSuccess = mp_UnderLayer->Send((unsigned char*) &Ip_header , nlength, dev_num);
+	BOOL bSuccess = mp_UnderLayer->Send((unsigned char*) &Ip_header, nlength, dev_num);
 	return bSuccess;
 }
 

@@ -85,7 +85,7 @@ void CRouterDlg::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_ROUTING_TABLE, ListBox_RoutingTable);
 	DDX_Control(pDX, IDC_CACHE_TABLE, ListBox_ARPCacheTable);
-	DDX_Control(pDX, IDC_PROXY_TABLE, ListBox_ARPProxyTable);
+	DDX_Control(pDX, IDC_PROXY_TABLE, ListBox_ICMPTable);
 	DDX_Control(pDX, IDC_NIC1_COMBO, m_nic1);
 	DDX_Control(pDX, IDC_NIC2_COMBO, m_nic2);
 	DDX_Control(pDX, IDC_IPADDRESS1, m_nic1_ip);
@@ -151,9 +151,9 @@ BOOL CRouterDlg::OnInitDialog()
 	ListBox_ARPCacheTable.InsertColumn(2,_T("Type"),LVCFMT_CENTER,80,-1);
 	//ListBox_ARPCacheTable.InsertColumn(3,_T("Time"),LVCFMT_CENTER,49,-1);
 
-	ListBox_ARPProxyTable.InsertColumn(0,_T("Name"),LVCFMT_CENTER,60,-1);
-	ListBox_ARPProxyTable.InsertColumn(1,_T("IP address"),LVCFMT_CENTER,120,-1);
-	ListBox_ARPProxyTable.InsertColumn(2,_T("Mac address"),LVCFMT_CENTER,120,-1);
+	ListBox_ICMPTable.InsertColumn(0,_T("Inner address"),LVCFMT_CENTER,60,-1);
+	ListBox_ICMPTable.InsertColumn(1,_T("Outer address"),LVCFMT_CENTER,120,-1);
+	ListBox_ICMPTable.InsertColumn(2,_T("Identifier"),LVCFMT_CENTER,120,-1);
 
 	setNicList(); //NicList Setting
 	return TRUE; // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
@@ -227,22 +227,10 @@ void CRouterDlg::OnBnClickedCacheDeleteAll()
 
 void CRouterDlg::OnBnClickedProxyDelete()
 {
-	//proxy delete버튼
-	m_ARPLayer->Proxy_Table.RemoveAll();
-	m_ARPLayer->updateProxyTable();
 }
 
 void CRouterDlg::OnBnClickedProxyDeleteAll()
 {
-	//proxy delete all 버튼
-	int index = -1;
-
-	index = ListBox_ARPProxyTable.GetSelectionMark();
-	if(index != -1){
-		POSITION pos = m_ARPLayer->Proxy_Table.FindIndex(index);
-		m_ARPLayer->Proxy_Table.RemoveAt(pos);
-		m_ARPLayer->updateProxyTable();
-	}
 }
 
 void CRouterDlg::OnBnClickedProxyAdd()
@@ -431,74 +419,6 @@ void CRouterDlg::UpdateRouteTable()
 		
 		ListBox_RoutingTable.UpdateWindow();
 	}
-}
-
-int CRouterDlg::Routing(unsigned char destip[4]) 
-{
-	/*
-	POSITION index;
-	RoutingTable entry;
-	RoutingTable select_entry;
-	entry.Interface = -2;
-	select_entry.Interface = -2;
-	unsigned char result[4];
-	for(int i=0; i<route_table.GetCount(); i++) {
-	index = route_table.FindIndex(i);
-	entry = route_table.GetAt(index);
-
-	// select_entry가 존재하지 않는 경우 
-	if(select_entry.Interface == -2){
-	for(int j=0; j<4; j++)
-	result[j] = destip[j] & entry.Netmask[j];
-
-	// destination이 같은 경우 
-	if(!memcmp(result,entry.Destnation,4)){ 
-
-	// gateway로 보내는 경우 
-	if(((entry.Flag & 0x01) == 0x01) && ((entry.Flag & 0x02) == 0x02)){ 
-	select_entry = entry;
-	m_IPLayer->SetDstIP(entry.Gateway);
-	}
-
-	// gateway가 아닌 경우 
-	else if(((entry.Flag & 0x01) == 0x01) && ((entry.Flag & 0x02) == 0x00)){ 
-	select_entry = entry;
-	m_IPLayer->SetDstIP(destip);
-	}
-	}
-	}
-	// 존재하는 경우 
-	else { 
-	for(int j=0; j<4; j++)
-	result[j] = destip[j] & entry.Netmask[j];
-
-	// 기존 select비트 보다 1의 개수가 많은 경우 
-	if(memcmp(result,entry.Netmask,4)){ 
-	for(int j=0; j<4; j++)
-	result[j] = destip[j] & entry.Netmask[j];
-
-	// destation이 같은 경우 
-	if(!memcmp(result,entry.Destnation,4)){ 
-
-	// gateway로 보내는 경우 
-	if(((entry.Flag & 0x01) == 0x01) && ((entry.Flag & 0x02) == 0x02)){ 
-	select_entry = entry;
-	m_IPLayer->SetDstIP(entry.Gateway);
-	}
-
-	// gateway가 아닌 경우
-	else if(((entry.Flag & 0x01) == 0x01) && ((entry.Flag & 0x02) == 0x00)){ 
-	select_entry = entry;
-	m_IPLayer->SetDstIP(destip);
-	}
-	}
-	}
-	// 더 적을 경우 pass 
-	}
-	}
-	return select_entry.Interface+1;
-	*/
-	return true;
 }
 
 void CRouterDlg::OnCbnSelchangeNic1Combo()

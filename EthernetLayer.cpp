@@ -13,7 +13,6 @@ CEthernetLayer::~CEthernetLayer()
 // Header를 초기화 하는 함수.
 void CEthernetLayer::ResetHeader()
 {
-
 	memset(Ethernet_Header.Ethernet_srcAddr.addr_ethernet, 0, 6); // destination address initialize
 	memset(Ethernet_Header.Ethernet_dstAddr.addr_ethernet, 0, 6); // source address initialize
 	Ethernet_Header.Ethernet_type = 0x0800; // data type initialize
@@ -36,8 +35,6 @@ unsigned char* CEthernetLayer::GetSourceAddressForRip(int dev_num)
 		return dev_1_mac_addr_for_rip;
 	return dev_2_mac_addr_for_rip;
 }
-
-
 
 // 수신자의 ethernet 주소를 얻어오는 함수.
 unsigned char* CEthernetLayer::GetDestinAddress()

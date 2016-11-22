@@ -47,7 +47,6 @@ public: //layer
 
 public: 
 	unsigned char *buf;
-	int Routing(unsigned char destip[4]);
 	pcap_if_t *Devices_1; //interface 0
 	pcap_if_t *Devices_2; //interface 1
 
@@ -66,7 +65,7 @@ public:
 public:
 	CListCtrl ListBox_RoutingTable;
 	CListCtrl ListBox_ARPCacheTable;
-	CListCtrl ListBox_ARPProxyTable;
+	CListCtrl ListBox_ICMPTable;
 	afx_msg void OnBnClickedCacheDelete();
 	afx_msg void OnBnClickedCacheDeleteAll();
 	afx_msg void OnBnClickedProxyDelete();

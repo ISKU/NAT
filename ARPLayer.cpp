@@ -7,7 +7,6 @@
 CARPLayer::CARPLayer(char *pName) : CBaseLayer(pName)
 {
 	ResetMessage();
-	ResetMessageProxy();
 	buf_index = 0;
 	out_index = 0;	
 	buf[0].valid = 0;
@@ -82,18 +81,6 @@ BOOL CARPLayer::Receive(unsigned char* ppayload,int dev_num) {
 	int index;
 	if(receive_arp_message->arp_op == request) { //요구
 		if(memcmp(receive_arp_message->arp_destprotoaddr, routerDlg->m_IPLayer->GetSrcIP(dev_num), 4)) { // 내 ip가 아닌데 올 경우
-			if((index = SearchProxyTable(receive_arp_message->arp_destprotoaddr)) != -1) 	{ //proxy Table에 존재할 경우
-				POSITION pos = Proxy_Table.FindIndex(index);
-				PROXY_ENTRY entry = Proxy_Table.GetAt(pos);
-				proxy_arp_message.arp_op = reply;
-				memcpy(proxy_arp_message.arp_destprotoaddr, receive_arp_message->arp_srcprotoaddr, 4);
-				memcpy(proxy_arp_message.arp_desthdaddr, receive_arp_message->arp_srchaddr, 6);
-				memcpy(proxy_arp_message.arp_srchaddr, routerDlg->m_EthernetLayer->GetSourceAddress(dev_num), 6);
-				memcpy(proxy_arp_message.arp_srcprotoaddr, entry.Ip_addr, 4); //proxy 값을 넣고 전송시켜줌
-				((CEthernetLayer*) this->mp_UnderLayer)->SetDestinAddress(ether_broad, dev_num);
-				routerDlg->m_EthernetLayer->Send((unsigned char *) &proxy_arp_message, ARP_MESSAGE_SIZE, arp_type,dev_num);
-			}
-
 			if((index = SearchIpAtTable(receive_arp_message->arp_srcprotoaddr)) != -1) { //cache table에 존재할 경우 갱신, 그리고 Reply 보내지 않음
 				//해당 entry를 찾아 값 수정
 				POSITION pos = Cache_Table.FindIndex(index);
@@ -209,20 +196,6 @@ int CARPLayer::SearchIpAtTable(unsigned char Ip_addr[4])
 	return ret;	
 }
 
-int CARPLayer::SearchProxyTable(unsigned char Ip_addr[4]) 
-{
-	int count, i, ret = -1;
-	PROXY_ENTRY temp;
-
-	count = Proxy_Table.GetCount();
-	for(i = 0; i < count; i++) {
-		temp = Proxy_Table.GetAt(Proxy_Table.FindIndex(i));
-		if(memcmp(Ip_addr ,temp.Ip_addr ,  4) == 0)
-			ret = i; // index 값 리턴
-	}
-	return ret;	
-}
-
 BOOL CARPLayer::InsertCache(LPCACHE_ENTRY Cache_entry)
 {
 	Cache_Table.AddTail(*Cache_entry);
@@ -243,29 +216,6 @@ BOOL CARPLayer::DeleteAllCache()
 	return TRUE;
 }
 
-BOOL CARPLayer::InsertProxy(CString name,unsigned char ip[4], unsigned char mac[6])
-{
-	PROXY_ENTRY entry;
-	entry.Device_name.Format("%s",name);
-	memcpy(entry.Ip_addr,ip,4);
-	memcpy(entry.Mac_addr,mac,6);
-	Proxy_Table.AddTail(entry);
-	this->updateProxyTable();
-	return TRUE;
-}
-
-BOOL CARPLayer::DeleteProxy(int index)
-{
-	//Proxy_Table.RemoveAt(index);
-	return TRUE;
-}
-
-BOOL CARPLayer::DeleteAllProxy()
-{
-	//Proxy_Table.RemoveAll();
-	return TRUE;
-}
-
 BOOL CARPLayer::ResetMessage()
 {
 	arp_message.arp_hdtype = htons(0x0001);
@@ -277,20 +227,6 @@ BOOL CARPLayer::ResetMessage()
 	memset(arp_message.arp_srcprotoaddr, 0, 4);
 	memset(arp_message.arp_destprotoaddr, 0, 4);
 	memset(arp_message.arp_desthdaddr, 0, 6);
-	return TRUE;
-}
-
-BOOL CARPLayer::ResetMessageProxy()
-{
-	proxy_arp_message.arp_hdtype = htons(0x0001);
-	proxy_arp_message.arp_prototype = htons(0x0800);
-	proxy_arp_message.arp_hdlength = 0x06;
-	proxy_arp_message.arp_protolength = 0x04;
-	proxy_arp_message.arp_op = htons(0x0000); //2개로 나뉨
-	memset(proxy_arp_message.arp_srchaddr, 0, 6);
-	memset(proxy_arp_message.arp_srcprotoaddr, 0, 4);
-	memset(proxy_arp_message.arp_destprotoaddr, 0, 4);
-	memset(proxy_arp_message.arp_desthdaddr, 0, 6);
 	return TRUE;
 }
 
@@ -317,28 +253,6 @@ void CARPLayer::updateCacheTable()
 	}
 
 	routerDlg->ListBox_ARPCacheTable.UpdateWindow();
-}
-
-void CARPLayer::updateProxyTable()
-{		
-	CRouterDlg * routerDlg =  ((CRouterDlg *)(GetUnderLayer()->GetUpperLayer(0)->GetUpperLayer(0)->GetUpperLayer(0)->GetUpperLayer(0)));
-	routerDlg->ListBox_ARPProxyTable.DeleteAllItems();
-	CString ip, mac, name;
-	POSITION index1;
-	PROXY_ENTRY entry1; //head position
-
-	for(int i = 0; i < Proxy_Table.GetCount(); i++) {
-		index1 = Proxy_Table.FindIndex(i);
-		entry1 = Proxy_Table.GetAt(index1);
-		ip.Format("%d.%d.%d.%d",entry1.Ip_addr[0],entry1.Ip_addr[1],entry1.Ip_addr[2],entry1.Ip_addr[3]);
-		mac.Format("%x-%x-%x-%x-%x-%x",entry1.Mac_addr[0],entry1.Mac_addr[1],entry1.Mac_addr[2],entry1.Mac_addr[3], entry1.Mac_addr[4],entry1.Mac_addr[5]);
-		name.Format("%s",entry1.Device_name);
-		routerDlg->ListBox_ARPProxyTable.InsertItem(i,name);
-		routerDlg->ListBox_ARPProxyTable.SetItem(i,1,LVIF_TEXT,ip,0,0,0,NULL);
-		routerDlg->ListBox_ARPProxyTable.SetItem(i,2,LVIF_TEXT,mac,0,0,0,NULL);
-	}
-
-	routerDlg->ListBox_ARPProxyTable.UpdateWindow();
 }
 
 void CARPLayer::decreaseTime()
