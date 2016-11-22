@@ -61,6 +61,9 @@
 #define RIP_HEADER_SIZE				4
 #define RIP_MAX_DATA				( UDP_MAX_DATA - RIP_HEADER_SIZE )
 
+#define DEV_PUBLIC					1
+#define DEV_PRIVATE					2
+
 #define complete					0x00
 #define incomplete					0x01
 

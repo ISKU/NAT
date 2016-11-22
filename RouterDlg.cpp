@@ -2,7 +2,6 @@
 #include "Router.h"
 #include "RouterDlg.h"
 #include "RoutTableAdder.h"
-#include "ProxyTableAdder.h"
 #include "IPLayer.h"
 
 #include <vector>
@@ -45,15 +44,14 @@ CRouterDlg::CRouterDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CRouterDlg::IDD, pParent), CBaseLayer("CRouterDlg")
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-	//listIndex = -1;
-	//ProxyListIndex = -1;
 	// Layer 생성
 	m_NILayer = new CNILayer("NI");
 	m_EthernetLayer = new CEthernetLayer("Ethernet");
 	m_ARPLayer = new CARPLayer("ARP");
 	m_IPLayer = new CIPLayer("IP");
 	m_UDPLayer = new CUDPLayer("UDP"); // UDP Layer
-	m_RIPLayer = new CRIPLayer("RIP"); // RIP Layer
+	m_ICMPLayer = new CICMPLayer("ICMP"); // ICMP Layer
+	m_TCPLayer = new CTCPLayer("TCP"); // TCP Layer
 
 	// Layer 추가										
 	m_LayerMgr.AddLayer( this );				
@@ -62,22 +60,36 @@ CRouterDlg::CRouterDlg(CWnd* pParent /*=NULL*/)
 	m_LayerMgr.AddLayer( m_ARPLayer );
 	m_LayerMgr.AddLayer( m_IPLayer );
 	m_LayerMgr.AddLayer( m_UDPLayer ); // UDP Layer 추가
-	m_LayerMgr.AddLayer( m_RIPLayer ); // RIP LAyer 추가
+	m_LayerMgr.AddLayer( m_ICMPLayer ); // ICMP LAyer 추가
+	m_LayerMgr.AddLayer( m_TCPLayer ); // TCP LAyer 추가
 
 	// Layer연결 ///////////////////////////////////////////////////////////////////////////
 	m_NILayer->SetUpperLayer(m_EthernetLayer);
+
 	m_EthernetLayer->SetUpperLayer(m_IPLayer);
 	m_EthernetLayer->SetUpperLayer(m_ARPLayer);
 	m_EthernetLayer->SetUnderLayer(m_NILayer);
+
 	m_ARPLayer->SetUnderLayer(m_EthernetLayer);
+
+	m_IPLayer->SetUpperLayer(m_ICMPLayer);
+	m_IPLayer->SetUpperLayer(m_TCPLayer);
 	m_IPLayer->SetUpperLayer(m_UDPLayer);
 	m_IPLayer->SetUnderLayer(m_ARPLayer);
-	m_UDPLayer->SetUpperLayer(m_RIPLayer);
+
+	m_ICMPLayer->SetUpperLayer(this);
+	m_ICMPLayer->SetUnderLayer(m_IPLayer);
+
+	m_UDPLayer->SetUpperLayer(this);
 	m_UDPLayer->SetUnderLayer(m_IPLayer);
-	m_RIPLayer->SetUpperLayer(this);
-	m_RIPLayer->SetUnderLayer(m_UDPLayer);
-	this->SetUnderLayer(m_RIPLayer);
-	// 새롭게 추가된 UDP, RIP Layer를 연결 Ethernet-> ARP -> IP -> UDP -> RIP -> Dialog
+
+	m_TCPLayer->SetUpperLayer(this);
+	m_TCPLayer->SetUnderLayer(m_IPLayer);
+
+	this->SetUnderLayer(m_ICMPLayer);
+	this->SetUnderLayer(m_UDPLayer);
+	this->SetUnderLayer(m_TCPLayer);
+	/////////////////////////////////////////////////////////////////////////////////////////
 }
 
 void CRouterDlg::DoDataExchange(CDataExchange* pDX)
@@ -85,7 +97,7 @@ void CRouterDlg::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_ROUTING_TABLE, ListBox_RoutingTable);
 	DDX_Control(pDX, IDC_CACHE_TABLE, ListBox_ARPCacheTable);
-	DDX_Control(pDX, IDC_PROXY_TABLE, ListBox_ARPProxyTable);
+	DDX_Control(pDX, IDC_ICMP_TABLE, ListBox_ICMPTable);
 	DDX_Control(pDX, IDC_NIC1_COMBO, m_nic1);
 	DDX_Control(pDX, IDC_NIC2_COMBO, m_nic2);
 	DDX_Control(pDX, IDC_IPADDRESS1, m_nic1_ip);
@@ -98,15 +110,13 @@ BEGIN_MESSAGE_MAP(CRouterDlg, CDialog)
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDC_CACHE_DELETE, &CRouterDlg::OnBnClickedCacheDelete)
 	ON_BN_CLICKED(IDC_CACHE_DELETE_ALL, &CRouterDlg::OnBnClickedCacheDeleteAll)
-	ON_BN_CLICKED(IDC_PROXY_DELETE, &CRouterDlg::OnBnClickedProxyDelete)
-	ON_BN_CLICKED(IDC_PROXY_DELETE_ALL, &CRouterDlg::OnBnClickedProxyDeleteAll)
-	ON_BN_CLICKED(IDC_PROXY_ADD, &CRouterDlg::OnBnClickedProxyAdd)
 	ON_BN_CLICKED(IDCANCEL, &CRouterDlg::OnBnClickedCancel)
 	ON_BN_CLICKED(IDC_NIC_SET_BUTTON, &CRouterDlg::OnBnClickedNicSetButton)
 	ON_CBN_SELCHANGE(IDC_NIC1_COMBO, &CRouterDlg::OnCbnSelchangeNic1Combo)
 	ON_CBN_SELCHANGE(IDC_NIC2_COMBO, &CRouterDlg::OnCbnSelchangeNic2Combo)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_ROUTING_TABLE, &CRouterDlg::OnLvnItemchangedRoutingTable)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_ROUTING_TABLE2, &CRouterDlg::OnLvnItemchangedRoutingTable2)
+	ON_NOTIFY(LVN_ITEMCHANGED, IDC_ICMP_TABLE, &CRouterDlg::OnLvnItemchangedIcmpTable)
 END_MESSAGE_MAP()
 
 // CRouterDlg 메시지 처리기
@@ -151,9 +161,11 @@ BOOL CRouterDlg::OnInitDialog()
 	ListBox_ARPCacheTable.InsertColumn(2,_T("Type"),LVCFMT_CENTER,80,-1);
 	//ListBox_ARPCacheTable.InsertColumn(3,_T("Time"),LVCFMT_CENTER,49,-1);
 
-	ListBox_ARPProxyTable.InsertColumn(0,_T("Name"),LVCFMT_CENTER,60,-1);
-	ListBox_ARPProxyTable.InsertColumn(1,_T("IP address"),LVCFMT_CENTER,120,-1);
-	ListBox_ARPProxyTable.InsertColumn(2,_T("Mac address"),LVCFMT_CENTER,120,-1);
+	ListBox_ICMPTable.InsertColumn(0,_T("Inner address"),LVCFMT_CENTER,60,-1);
+	ListBox_ICMPTable.InsertColumn(1,_T("Outer address"),LVCFMT_CENTER,120,-1);
+	ListBox_ICMPTable.InsertColumn(2,_T("Identifier"),LVCFMT_CENTER,120,-1);
+	ListBox_ICMPTable.InsertColumn(3,_T("Sequence"),LVCFMT_CENTER,120,-1);
+	ListBox_ICMPTable.InsertColumn(4,_T("Time"),LVCFMT_CENTER,120,-1);
 
 	setNicList(); //NicList Setting
 	return TRUE; // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
@@ -223,43 +235,6 @@ void CRouterDlg::OnBnClickedCacheDeleteAll()
 	//CacheDeleteAll버튼
 	m_ARPLayer->Cache_Table.RemoveAll();
 	m_ARPLayer->updateCacheTable();
-}
-
-void CRouterDlg::OnBnClickedProxyDelete()
-{
-	//proxy delete버튼
-	m_ARPLayer->Proxy_Table.RemoveAll();
-	m_ARPLayer->updateProxyTable();
-}
-
-void CRouterDlg::OnBnClickedProxyDeleteAll()
-{
-	//proxy delete all 버튼
-	int index = -1;
-
-	index = ListBox_ARPProxyTable.GetSelectionMark();
-	if(index != -1){
-		POSITION pos = m_ARPLayer->Proxy_Table.FindIndex(index);
-		m_ARPLayer->Proxy_Table.RemoveAt(pos);
-		m_ARPLayer->updateProxyTable();
-	}
-}
-
-void CRouterDlg::OnBnClickedProxyAdd()
-{
-	// proxy add 버튼
-	CString str;
-	unsigned char Ip[4];
-	unsigned char Mac[8];
-	ProxyTableAdder PDlg;
-
-	if(	PDlg.DoModal() == IDOK)
-	{
-		str = PDlg.getName();
-		memcpy(Ip , PDlg.getIp() , 4);
-		memcpy(Mac , PDlg.getMac() , 6);
-		// m_ARPLayer->InsertProxy(str,Ip,Mac);
-	}
 }
 
 void CRouterDlg::OnBnClickedCancel()
@@ -363,9 +338,9 @@ void CRouterDlg::OnBnClickedNicSetButton()
 	m_EthernetLayer->SetSourceAddress(OidData1->Data,1);
 	m_EthernetLayer->SetSourceAddress(OidData2->Data,2);
 
-	m_RIPLayer->Send(1, 1, 0);
-	m_RIPLayer->Send(1, 2, 0);
-	StartReadThread(); // RIP Response Thread start 30초
+	//m_RIPLayer->Send(1, 1, 0);
+	//m_RIPLayer->Send(1, 2, 0);
+	//StartReadThread(); // RIP Response Thread start 30초
 	/////////////////////////////////////////////////////////////////////
 }
 
@@ -431,74 +406,6 @@ void CRouterDlg::UpdateRouteTable()
 		
 		ListBox_RoutingTable.UpdateWindow();
 	}
-}
-
-int CRouterDlg::Routing(unsigned char destip[4]) 
-{
-	/*
-	POSITION index;
-	RoutingTable entry;
-	RoutingTable select_entry;
-	entry.Interface = -2;
-	select_entry.Interface = -2;
-	unsigned char result[4];
-	for(int i=0; i<route_table.GetCount(); i++) {
-	index = route_table.FindIndex(i);
-	entry = route_table.GetAt(index);
-
-	// select_entry가 존재하지 않는 경우 
-	if(select_entry.Interface == -2){
-	for(int j=0; j<4; j++)
-	result[j] = destip[j] & entry.Netmask[j];
-
-	// destination이 같은 경우 
-	if(!memcmp(result,entry.Destnation,4)){ 
-
-	// gateway로 보내는 경우 
-	if(((entry.Flag & 0x01) == 0x01) && ((entry.Flag & 0x02) == 0x02)){ 
-	select_entry = entry;
-	m_IPLayer->SetDstIP(entry.Gateway);
-	}
-
-	// gateway가 아닌 경우 
-	else if(((entry.Flag & 0x01) == 0x01) && ((entry.Flag & 0x02) == 0x00)){ 
-	select_entry = entry;
-	m_IPLayer->SetDstIP(destip);
-	}
-	}
-	}
-	// 존재하는 경우 
-	else { 
-	for(int j=0; j<4; j++)
-	result[j] = destip[j] & entry.Netmask[j];
-
-	// 기존 select비트 보다 1의 개수가 많은 경우 
-	if(memcmp(result,entry.Netmask,4)){ 
-	for(int j=0; j<4; j++)
-	result[j] = destip[j] & entry.Netmask[j];
-
-	// destation이 같은 경우 
-	if(!memcmp(result,entry.Destnation,4)){ 
-
-	// gateway로 보내는 경우 
-	if(((entry.Flag & 0x01) == 0x01) && ((entry.Flag & 0x02) == 0x02)){ 
-	select_entry = entry;
-	m_IPLayer->SetDstIP(entry.Gateway);
-	}
-
-	// gateway가 아닌 경우
-	else if(((entry.Flag & 0x01) == 0x01) && ((entry.Flag & 0x02) == 0x00)){ 
-	select_entry = entry;
-	m_IPLayer->SetDstIP(destip);
-	}
-	}
-	}
-	// 더 적을 경우 pass 
-	}
-	}
-	return select_entry.Interface+1;
-	*/
-	return true;
 }
 
 void CRouterDlg::OnCbnSelchangeNic1Combo()
@@ -601,3 +508,10 @@ unsigned int CRouterDlg::TableCheck(LPVOID pParam){
 	return 0;
 }
 ///////////////////////////////////////////////////////////////////////////////////
+
+void CRouterDlg::OnLvnItemchangedIcmpTable(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	*pResult = 0;
+}

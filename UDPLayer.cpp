@@ -66,7 +66,7 @@ unsigned short CUDPLayer::GetLengthForRIP(int dev_num)
 
 void CUDPLayer::SetSendPseudoHeader(unsigned short length, int dev_num)
 {
-	CRouterDlg * routerDlg =  ((CRouterDlg *) GetUpperLayer(0)->GetUpperLayer(0));
+	CRouterDlg * routerDlg =  ((CRouterDlg *) GetUpperLayer(0));
 
 	memcpy(Udp_pseudo_header.Pseudo_srcIp, routerDlg->m_IPLayer->GetSrcIP(dev_num), 4);
 	memcpy(Udp_pseudo_header.Pseudo_dstIp, routerDlg->m_IPLayer->GetDstIP(dev_num), 4);
@@ -75,7 +75,7 @@ void CUDPLayer::SetSendPseudoHeader(unsigned short length, int dev_num)
 
 void CUDPLayer::SetReceivePseudoHeader(unsigned char* srcIp, unsigned char* dstIp, unsigned short length)
 {
-	CRouterDlg * routerDlg =  ((CRouterDlg *)GetUpperLayer(0)->GetUpperLayer(0));
+	CRouterDlg * routerDlg =  ((CRouterDlg *) GetUpperLayer(0));
 
 	memcpy(Udp_pseudo_header.Pseudo_srcIp, srcIp, 4);
 	memcpy(Udp_pseudo_header.Pseudo_dstIp, dstIp, 4);
@@ -144,7 +144,8 @@ BOOL CUDPLayer::IsValidChecksum(unsigned char* p_udpheader, unsigned short check
 
 BOOL CUDPLayer::Send(unsigned char* ppayload, int nlength, int dev_num)
 {
-	CRouterDlg * routerDlg =  ((CRouterDlg *) GetUpperLayer(0)->GetUpperLayer(0));
+	/*
+	CRouterDlg * routerDlg =  ((CRouterDlg *) GetUpperLayer(0));
 
 	memcpy(Udp_header.Udp_data, ppayload, nlength);
 	nlength = UDP_HEADER_SIZE + nlength;
@@ -155,11 +156,14 @@ BOOL CUDPLayer::Send(unsigned char* ppayload, int nlength, int dev_num)
 	Udp_header.Udp_checksum = (unsigned short) htons(SetChecksum(nlength));
 
 	BOOL bSuccess = mp_UnderLayer->Send((unsigned char*)&Udp_header, nlength, dev_num);
-	return bSuccess;
+	*/
+	return true;
+	
 }
 
 BOOL CUDPLayer::Receive(unsigned char* ppayload, int dev_num)
 {
+	/*
 	PUdpHeader pFrame = (PUdpHeader) ppayload;
 	BOOL bSuccess = FALSE;
 
@@ -170,8 +174,8 @@ BOOL CUDPLayer::Receive(unsigned char* ppayload, int dev_num)
 		SetLengthForRIP((unsigned short) htons(pFrame->Udp_length), dev_num);
 		bSuccess = GetUpperLayer(0)->Receive((unsigned char *) pFrame->Udp_data, dev_num);
 	}
-
-	return bSuccess;
+	*/
+	return true;
 }
 
 void CUDPLayer::ResetHeader()

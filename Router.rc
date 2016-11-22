@@ -85,14 +85,11 @@ FONT 9, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     PUSHBUTTON      "¡æ∑·",IDCANCEL,490,311,50,14
     CONTROL         "",IDC_CACHE_TABLE,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,356,22,174,78
-    CONTROL         "",IDC_PROXY_TABLE,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,358,142,174,130
+    CONTROL         "",IDC_ICMP_TABLE,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,358,142,174,130
     GROUPBOX        "ARP Cache Table",IDC_STATIC,348,11,191,115
     PUSHBUTTON      "Delete",IDC_CACHE_DELETE,372,104,52,14
     PUSHBUTTON      "Delete All",IDC_CACHE_DELETE_ALL,464,104,50,14
     GROUPBOX        "ICMP Table",IDC_STATIC,348,129,191,173
-    PUSHBUTTON      "Delete",IDC_PROXY_DELETE,421,279,50,14
-    PUSHBUTTON      "Delete All",IDC_PROXY_DELETE_ALL,482,279,50,14
-    PUSHBUTTON      "Add",IDC_PROXY_ADD,358,279,50,14
     CONTROL         "",IDC_ROUTING_TABLE,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,23,144,309,155
     GROUPBOX        "NAT Table",IDC_STATIC,15,128,325,175
     COMBOBOX        IDC_NIC1_COMBO,64,24,267,47,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
@@ -256,7 +253,7 @@ END
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)
 LANGUAGE 18, 1
 #pragma code_page(949)
-#include "res\Router.rc2"  // Microsoft Visual C++ AI¢ÆE°ÀcE°À¢ÁEcE?UAC ¢ÆE°ÀcE°À¢ÁEcE¢ÆE°ÀcE°À¢ÁEcIU¢ÆE°ÀcE°À¢ÁEcE¢ÆE°ÀcE°À¢ÁEc°À¢Á¢Æ°øI¢ÆE°Àc¢Æ°◊I°À¢ÁE¢ÆEcE¢ÆE°ÀcEcI ¢ÆE°ÀcE°À¢ÁEcIi¢ÆE°ÀcE°À¢ÁEcIi°À¢ÁE¢ÆEcE¢ÆE°ÀcEc°À¢ÁE¢ÆEc¢ÆE°Àc°À¢Á°À?u¢ÆE°ÀcE°À¢ÁEcE¢ÆE°ÀcE°À¢ÁEc°À¢Á¢Æ°øI¢ÆE°Àc¢Æ°◊I¢ÆE°ÀcE°À¢ÁEcE?¢ÆE°ÀcE°À¢ÁEcE°À¢ÁE¢ÆEcEc¢ÆE°ÀcE°À¢ÁEc°À¢ÁE¢ÆEc¢ÆE°Àc¢ÆE?u°À¢ÁE¢ÆEcE¢ÆE°ÀcEc°À¢ÁE¢ÆEc¢ÆE°Àc°À¢Á°À?I ¢ÆE°ÀcE°À¢ÁEc°À¢ÁE¢ÆEc¢ÆE°Àc¢ÆE?°À¢ÁE¢ÆEcE¢ÆE°ÀcEciAyCN ¢ÆE°ÀcE°À¢ÁEcE¢ÆE°ÀcE°À¢ÁEc°À¢Á¢Æ°øI¢ÆE°Àc¢Æ°◊I¢ÆE°ÀcE°À¢ÁEcEc¢ÆE°ÀcE°À¢ÁEc°À¢ÁE¢ÆEc¢ÆE°Àc¢ÆE?uO¢ÆE°ÀcE°À¢ÁEc°À¢ÁE¢ÆEc¢ÆE°Àc¢ÆE?o¢ÆE°ÀcE°À¢ÁEc°À¢ÁE¢ÆEc¢ÆE°Àc¢ÆE?¢ÆE°ÀcE°À¢ÁEc°À¢Á¢Æ°øI¢ÆE°Àc¢Æ°◊IAO¢ÆE°ÀcE°À¢ÁEcE¢ÆE°ÀcE°À¢ÁEcII¢ÆE°ÀcE°À¢ÁEcE¢ÆE°ÀcE°À¢ÁEcIU.
+//#include "res\Router.rc2"  // Microsoft Visual C++ AI¢ÆE°ÀcE°À¢ÁEcE?UAC ¢ÆE°ÀcE°À¢ÁEcE¢ÆE°ÀcE°À¢ÁEcIU¢ÆE°ÀcE°À¢ÁEcE¢ÆE°ÀcE°À¢ÁEc°À¢Á¢Æ°øI¢ÆE°Àc¢Æ°◊I°À¢ÁE¢ÆEcE¢ÆE°ÀcEcI ¢ÆE°ÀcE°À¢ÁEcIi¢ÆE°ÀcE°À¢ÁEcIi°À¢ÁE¢ÆEcE¢ÆE°ÀcEc°À¢ÁE¢ÆEc¢ÆE°Àc°À¢Á°À?u¢ÆE°ÀcE°À¢ÁEcE¢ÆE°ÀcE°À¢ÁEc°À¢Á¢Æ°øI¢ÆE°Àc¢Æ°◊I¢ÆE°ÀcE°À¢ÁEcE?¢ÆE°ÀcE°À¢ÁEcE°À¢ÁE¢ÆEcEc¢ÆE°ÀcE°À¢ÁEc°À¢ÁE¢ÆEc¢ÆE°Àc¢ÆE?u°À¢ÁE¢ÆEcE¢ÆE°ÀcEc°À¢ÁE¢ÆEc¢ÆE°Àc°À¢Á°À?I ¢ÆE°ÀcE°À¢ÁEc°À¢ÁE¢ÆEc¢ÆE°Àc¢ÆE?°À¢ÁE¢ÆEcE¢ÆE°ÀcEciAyCN ¢ÆE°ÀcE°À¢ÁEcE¢ÆE°ÀcE°À¢ÁEc°À¢Á¢Æ°øI¢ÆE°Àc¢Æ°◊I¢ÆE°ÀcE°À¢ÁEcEc¢ÆE°ÀcE°À¢ÁEc°À¢ÁE¢ÆEc¢ÆE°Àc¢ÆE?uO¢ÆE°ÀcE°À¢ÁEc°À¢ÁE¢ÆEc¢ÆE°Àc¢ÆE?o¢ÆE°ÀcE°À¢ÁEc°À¢ÁE¢ÆEc¢ÆE°Àc¢ÆE?¢ÆE°ÀcE°À¢ÁEc°À¢Á¢Æ°øI¢ÆE°Àc¢Æ°◊IAO¢ÆE°ÀcE°À¢ÁEcE¢ÆE°ÀcE°À¢ÁEcII¢ÆE°ÀcE°À¢ÁEcE¢ÆE°ÀcE°À¢ÁEcIU.
 #include "l.KOR\afxres.rc"      // C°À¢ÁE¢ÆEcE¢ÆE°ÀcEcIA¢ÆE°ÀcE°À¢ÁEc°À¢ÁE¢ÆEc¢ÆE°Àc¢ÆE?°À¢ÁE¢ÆEc¢ÆE°Àc°À¢Á°À?°À¢ÁE¢ÆEcI °À¢ÁE¢ÆEcE¢ÆE°ÀcEc°À¢ÁE¢ÆEc¢ÆE°Àc°À¢Á°À?u¢ÆE°ÀcE°À¢ÁEcE¢ÆE°ÀcE°À¢ÁEc°À¢Á¢Æ°øI¢ÆE°Àc¢Æ°◊I¢ÆE°ÀcE°À¢ÁEc°À¢ÁE¢ÆEc¢ÆE°Àc¢ÆE?u¢ÆE°ÀcE°À¢ÁEc°À¢ÁE¢ÆEc¢ÆE°Àc¢ÆE?¢ÆE°ÀcE°À¢ÁEc°À¢Á¢Æ°øI¢ÆE°Àc¢Æ°◊I ¢ÆE°ÀcE°À¢ÁEcE?a¢ÆE°ÀcE°À¢ÁEc°À¢ÁE¢ÆEc¢ÆE°Àc¢ÆE?uOAO¢ÆE°ÀcE°À¢ÁEcE¢ÆE°ÀcE°À¢ÁEcII¢ÆE°ÀcE°À¢ÁEcE¢ÆE°ÀcE°À¢ÁEcIU.
 #endif
 

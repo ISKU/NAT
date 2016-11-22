@@ -31,14 +31,6 @@ void CIPLayer::SetSrcIP(unsigned char* ip ,int dev_num)
 	memcpy(&Ip_header.Ip_srcAddress,ip,4);
 }
 
-void CIPLayer::SetSrcIPForRIPLayer(unsigned char* ip, int dev_num)
-{
-	if(dev_num == 1)
-		memcpy(dev_1_ip_addr_for_rip , ip , 4 );
-	else 
-		memcpy(dev_2_ip_addr_for_rip , ip , 4 );
-}
-
 unsigned char* CIPLayer::GetDstIP(int dev_num)
 {
 	if(dev_num == 1)
@@ -53,11 +45,24 @@ unsigned char* CIPLayer::GetSrcIP(int dev_num)
 	return dev_2_ip_addr;
 }
 
-unsigned char* CIPLayer::GetSrcIPForRIPLayer(int dev_num) 
+unsigned char* CIPLayer::GetSrcFromPacket()
 {
-	if(dev_num == 1)
-		return dev_1_ip_addr_for_rip;
-	return dev_2_ip_addr_for_rip;
+	return receivedPacket->Ip_srcAddressByte;
+}
+
+unsigned char* CIPLayer::GetDstFromPacket()
+{
+	return receivedPacket->Ip_dstAddressByte;
+}
+
+void CIPLayer::SetSrcPacketIP(unsigned char* ip)
+{
+	memcpy(receivedPacket->Ip_srcAddressByte, ip, 4);
+}
+
+void CIPLayer::SetDstPacketIP(unsigned char* ip)
+{
+	memcpy(receivedPacket->Ip_dstAddressByte, ip, 4);
 }
 
 unsigned char CIPLayer::GetProtocol(int dev_num) 
@@ -116,20 +121,11 @@ BOOL CIPLayer::IsValidChecksum(unsigned char* p_header, unsigned short checksum)
 	return	ret == 0;
 }
 
-// ppayload == (unsigned char*)&Tcp_header
 BOOL CIPLayer::Send(unsigned char* ppayload, int nlength, int dev_num)
 {
-	// IP 주소 셋팅은 Set 버튼을 눌렀을때 셋팅이 되었으므로 data와 전체 크기를 저장후 전송
-
-	memcpy(Ip_header.Ip_data , ppayload , nlength);
-	nlength = nlength + IP_HEADER_SIZE;
-	Ip_header.Ip_len = (unsigned short) htons(nlength);
-	memcpy(Ip_header.Ip_srcAddressByte, GetSrcIP(dev_num), 4);
-	Ip_header.Ip_checksum = htons(SetChecksum((unsigned char*)&Ip_header));
-
-	
-	BOOL bSuccess = mp_UnderLayer->Send((unsigned char*) &Ip_header , nlength, dev_num);
-	return bSuccess;
+   receivedPacket->Ip_checksum = htons(SetChecksum((unsigned char*) receivedPacket));
+   BOOL bSuccess = mp_UnderLayer->Send((unsigned char*) receivedPacket, (int) ntohs(receivedPacket->Ip_len), dev_num);
+   return bSuccess;
 }
 
 BOOL CIPLayer::Receive(unsigned char* ppayload, int dev_num)
@@ -137,53 +133,32 @@ BOOL CIPLayer::Receive(unsigned char* ppayload, int dev_num)
 	unsigned char broadcast[4] = { 0xff, 0xff, 0xff , 0xff };
 	unsigned char multicast[4] = { 0xe0, 0, 0, 0x9 };
 	
-	CRouterDlg* routerDlg = ((CRouterDlg *) (GetUpperLayer(0)->GetUpperLayer(0)->GetUpperLayer(0)));
-	PIpHeader pFrame = (PIpHeader) ppayload;
+	CRouterDlg* routerDlg = ((CRouterDlg *) (GetUpperLayer(0)->GetUpperLayer(0)));
+	receivedPacket = (PIpHeader) ppayload;
 
-	if(!memcmp(pFrame->Ip_srcAddressByte, GetSrcIP(dev_num), 4)) //자신이 보낸 패킷은 버린다
+	if(!memcmp(receivedPacket->Ip_srcAddressByte, GetSrcIP(dev_num), 4)) //자신이 보낸 패킷은 버린다
 		return FALSE;
 
-	if(!IsValidChecksum((unsigned char*) pFrame, ntohs(pFrame->Ip_checksum)))
+	if(!IsValidChecksum((unsigned char*) receivedPacket, ntohs(receivedPacket->Ip_checksum)))
 		return FALSE;
 
-	if( pFrame->Ip_timeToLive == 0 ) //ttl이 0일 경우 버림
+	if(receivedPacket->Ip_timeToLive == 0 ) //ttl이 0일 경우 버림
       return FALSE;
 
-	if (memcmp(pFrame->Ip_dstAddressByte, broadcast, 4) && memcmp(pFrame->Ip_dstAddressByte, multicast, 4)) { //broadcast, multicast가 아닐 경우
-		if(memcmp(pFrame->Ip_dstAddressByte, GetSrcIP(1), 4) && memcmp(pFrame->Ip_dstAddressByte, GetSrcIP(2), 4)) { //router의 주소가 아닐 경우
-			int selectIndex = Forwarding(pFrame->Ip_dstAddressByte);
-		
-			if (selectIndex != -1) { //routing 정보가 존재
-				CRouterDlg::RoutingTable entry = CRouterDlg::route_table.GetAt(CRouterDlg::route_table.FindIndex(selectIndex));
-				if (entry.metric == 16)
-					return FALSE;
-				if (entry.out_interface != dev_num) { //routing해야할 곳이 패킷이 들어온 방향과 다를 때
-					unsigned char zeroip[4], destip[4];
-					memcpy(destip, entry.nexthop, 4);
-					memset(zeroip, 0, 4);
-			
-					if (memcmp(zeroip, destip, 4) == 0) //목표 network가 해당 router에 붙어있음
-						SetDstIP(pFrame->Ip_dstAddressByte, entry.out_interface);
-					else //목표 router가 한 hop 이상 떨어져있음
-						SetDstIP(destip, entry.out_interface);
-				
-					pFrame->Ip_timeToLive = htons(ntohs(pFrame->Ip_timeToLive) - 1); // TTL 감소
-					pFrame->Ip_checksum = htons(SetChecksum((unsigned char*) pFrame)); // Checksum 계산
-					mp_UnderLayer->Send((unsigned char*) pFrame, (int) ntohs(pFrame->Ip_len), entry.out_interface);
-					return TRUE;
-				}
-			}
-			return FALSE;
-		}
-		
+	if (receivedPacket->Ip_protocol == 0x01) { // icmp protocol (01) 확인
+		return GetUpperLayer(0)->Receive((unsigned char *)receivedPacket->Ip_data, dev_num);
+	}
+	
+	if (receivedPacket->Ip_protocol == 0x06) { // tcp protocol (06) 확인
+//		((CTCPLayer*)GetUpperLayer(1))->SetReceivePseudoHeader(receivedPacket->Ip_srcAddressByte, receivedPacket->Ip_dstAddressByte, (unsigned short) htons(ntohs(receivedPacket->Ip_len) - IP_HEADER_SIZE));
+		return GetUpperLayer(1)->Receive((unsigned char *)receivedPacket->Ip_data, dev_num);
 	}
 
-	if (pFrame->Ip_protocol == 0x11) { // udp protocol (17) 확인
-		SetSrcIPForRIPLayer(pFrame->Ip_srcAddressByte, dev_num);
-		((CUDPLayer*)GetUpperLayer(0))->SetReceivePseudoHeader(pFrame->Ip_srcAddressByte, pFrame->Ip_dstAddressByte, (unsigned short) htons(ntohs(pFrame->Ip_len) - IP_HEADER_SIZE));
-		return GetUpperLayer(0)->Receive((unsigned char *)pFrame->Ip_data, dev_num);
+	if (receivedPacket->Ip_protocol == 0x11) { // udp protocol (17) 확인
+		((CUDPLayer*)GetUpperLayer(2))->SetReceivePseudoHeader(receivedPacket->Ip_srcAddressByte, receivedPacket->Ip_dstAddressByte, (unsigned short) htons(ntohs(receivedPacket->Ip_len) - IP_HEADER_SIZE));
+		return GetUpperLayer(2)->Receive((unsigned char *)receivedPacket->Ip_data, dev_num);
 	}
-		
+
 	return FALSE;
 }
 

@@ -7,10 +7,6 @@ public:
 	CICMPLayer(char* pName = NULL);
 	virtual ~CICMPLayer();
 
-	BOOL Send(unsigned char* ppayload, int nlength, int dev_num);
-	BOOL Receive(unsigned char* ppayload, int dev_num);
-
-public:
 	typedef struct _ICMP {
 		unsigned char Icmp_type;
 		unsigned char Icmp_code;
@@ -20,11 +16,22 @@ public:
 		unsigned char Icmp_data[ICMP_MAX_DATA];
 	} IcmpHeader, *PIcmpHeader;
 
+	typedef struct _ICMP_ENTRY {
+		unsigned char inner_addr[4];
+		unsigned char outer_addr[4];
+		unsigned short identifier;
+		unsigned short sequenceNumber;
+		unsigned int time;
+	} ICMP_ENTRY, *PICMP_ENTRY;
+
+	BOOL Send(unsigned char* ppayload, int nlength, int dev_num);
+	BOOL Receive(unsigned char* ppayload, int dev_num);
+	void UpdateTable();
+
+	CList<ICMP_ENTRY,ICMP_ENTRY&> Icmp_table;
+
 	IcmpHeader Icmp_header;
 
 private:
-	inline void		ResetHeader();
-	void			ResetPseudoHeader();
-
-private:
+	int				searchTable(unsigned short identifier, unsigned short sequenceNumber);
 };

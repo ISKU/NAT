@@ -10,13 +10,15 @@ public:
 	unsigned char* GetDstIP(int dev_num);
 	unsigned char* GetSrcIP(int dev_num);
 	unsigned char GetProtocol(int dev_num);
-	unsigned char* GetSrcIPForRIPLayer(int dev_num);
+	void SetSrcPacketIP(unsigned char* ip);
+	void SetDstPacketIP(unsigned char* ip);
+	unsigned char* GetSrcFromPacket();
+	unsigned char* GetDstFromPacket();
 	unsigned short SetChecksum(unsigned char p_header[20]);
 	BOOL IsValidChecksum(unsigned char* received_header, unsigned short checksum);
 	void SetDstIP(unsigned char* ip, int dev_num);
 	void SetSrcIP(unsigned char* ip, int dev_num);
 	void SetProtocol(unsigned char protocol, int dev_num);
-	void SetSrcIPForRIPLayer(unsigned char* ip, int dev_num);
 
 	BOOL Send(unsigned char* ppayload, int nlength,int dev_num);
 	BOOL Receive(unsigned char* ppayload, int dev_num);
@@ -43,6 +45,8 @@ public:
 		unsigned char Ip_data[IP_MAX_DATA];
 	} IpHeader, *PIpHeader;
 
+	PIpHeader receivedPacket;
+
 private:
 	unsigned char dev_1_ip_addr[4];
 	unsigned char dev_2_ip_addr[4];
@@ -50,8 +54,7 @@ private:
 	unsigned char dev_2_dst_ip_addr[4];
 	unsigned char dev_1_protocol;
 	unsigned char dev_2_protocol;
-	unsigned char dev_1_ip_addr_for_rip[4];
-	unsigned char dev_2_ip_addr_for_rip[4];
+
 	inline void	ResetHeader(); // IP 헤더 초기화 함수
 	inline int Forwarding(unsigned char destip[4]);
 	int CIPLayer::ContainsRouteTableEntry(unsigned char Ip_addr[4]);

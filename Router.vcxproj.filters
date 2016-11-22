@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ProxyTableAdder.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Router.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -51,9 +48,6 @@
     <ClCompile Include="UDPLayer.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="RIPLayer.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="TCPLayer.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -76,9 +70,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ProxyTableAdder.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Resource.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -116,9 +107,6 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="UDPLayer.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="RIPLayer.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="TCPLayer.h">

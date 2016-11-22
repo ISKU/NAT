@@ -34,12 +34,12 @@ void CTCPLayer::SetDstPort(unsigned short port)
 
 BOOL CTCPLayer::Send(unsigned char* ppayload, int nlength, int dev_num)
 {
-
+	return true;
 }
 
 BOOL CTCPLayer::Receive(unsigned char* ppayload, int dev_num)
 {
-
+	return true;
 }
 
 void CTCPLayer::ResetHeader()
