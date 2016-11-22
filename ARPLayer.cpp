@@ -21,7 +21,7 @@ CARPLayer::~CARPLayer(void)
 BOOL CARPLayer::Send(unsigned char* ppayload, int nlength, int dev_num)
 {
 	int index;
-	CRouterDlg * routerDlg =  ((CRouterDlg *)(GetUnderLayer()->GetUpperLayer(0)->GetUpperLayer(0)->GetUpperLayer(0)->GetUpperLayer(0)));
+	CRouterDlg * routerDlg =  ((CRouterDlg *)(GetUnderLayer()->GetUpperLayer(0)->GetUpperLayer(0)->GetUpperLayer(0)));
 	unsigned char broadcast[4];
 	unsigned char ether_broad[6];
 	memset(broadcast,0xff,4);
@@ -71,7 +71,7 @@ BOOL CARPLayer::Send(unsigned char* ppayload, int nlength, int dev_num)
 
 BOOL CARPLayer::Receive(unsigned char* ppayload,int dev_num) {
 	LPARP_Message receive_arp_message = (LPARP_Message)ppayload;
-	CRouterDlg * routerDlg =  ((CRouterDlg *)(GetUnderLayer()->GetUpperLayer(0)->GetUpperLayer(0)->GetUpperLayer(0)->GetUpperLayer(0)));
+	CRouterDlg * routerDlg =  ((CRouterDlg *)(GetUnderLayer()->GetUpperLayer(0)->GetUpperLayer(0)->GetUpperLayer(0)));
 	unsigned char broadcast[4];
 	unsigned char ether_broad[6];
 	memset(broadcast,0xff,4);
@@ -233,7 +233,7 @@ BOOL CARPLayer::ResetMessage()
 //케쉬 테이블 업데이트 함수
 void CARPLayer::updateCacheTable()
 { 
-	CRouterDlg * routerDlg =  ((CRouterDlg *)(GetUnderLayer()->GetUpperLayer(0)->GetUpperLayer(0)->GetUpperLayer(0)->GetUpperLayer(0)));
+	CRouterDlg * routerDlg =  ((CRouterDlg *)(GetUnderLayer()->GetUpperLayer(0)->GetUpperLayer(0)->GetUpperLayer(0)));
 	routerDlg->ListBox_ARPCacheTable.DeleteAllItems(); //내용 초기화
 	CString ip,mac,time,type;
 	POSITION index;

@@ -2,7 +2,6 @@
 #include "resource.h"
 #include "TCPLayer.h"
 #include "ICMPLayer.h"
-#include "RIPLayer.h"
 #include "UDPLayer.h"
 #include "ARPLayer.h"
 #include "IPLayer.h"
@@ -40,7 +39,6 @@ public: //layer
 	CARPLayer		*m_ARPLayer;
 	CIPLayer		*m_IPLayer;
 	CUDPLayer		*m_UDPLayer;
-	CRIPLayer		*m_RIPLayer;
 	CICMPLayer		*m_ICMPLayer;
 	CTCPLayer		*m_TCPLayer;
 
@@ -91,6 +89,7 @@ public:
 	CIPAddressCtrl m_nic2_ip;
 	afx_msg void OnLvnItemchangedRoutingTable(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnLvnItemchangedRoutingTable2(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnLvnItemchangedIcmpTable(NMHDR *pNMHDR, LRESULT *pResult);
 
 	// RIP 응답 메시지 30초 Thread
 	CWinThread* pThread_1;
@@ -100,5 +99,4 @@ public:
 	static unsigned int WaitRipResponseMessagePacket_1(LPVOID pParam);
 	static unsigned int WaitRipResponseMessagePacket_2(LPVOID pParam);
 	static unsigned int TableCheck(LPVOID pParam);
-	afx_msg void OnLvnItemchangedIcmpTable(NMHDR *pNMHDR, LRESULT *pResult);
 };

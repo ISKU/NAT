@@ -2,6 +2,14 @@
 #include "ICMPLayer.h"
 #include "RouterDlg.h"
 
+CICMPLayer::CICMPLayer(char* pName) : CBaseLayer(pName) 
+{ 
+}
+
+CICMPLayer::~CICMPLayer() 
+{ 
+}
+
 BOOL CICMPLayer::Send(unsigned char* ppayload, int nlength, int dev_num) {
 	return true;
 }

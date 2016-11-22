@@ -4,6 +4,9 @@
 class CICMPLayer : public CBaseLayer
 {
 public:
+	CICMPLayer(char* pName = NULL);
+	virtual ~CICMPLayer();
+
 	typedef struct _ICMP {
 		unsigned char Icmp_type;
 		unsigned char Icmp_code;
@@ -21,20 +24,14 @@ public:
 		unsigned int time;
 	} ICMP_ENTRY, *PICMP_ENTRY;
 
-	CICMPLayer(char* pName = NULL);
-	virtual ~CICMPLayer();
-
 	BOOL Send(unsigned char* ppayload, int nlength, int dev_num);
 	BOOL Receive(unsigned char* ppayload, int dev_num);
+	void UpdateTable();
 
 	CList<ICMP_ENTRY,ICMP_ENTRY&> Icmp_table;
 
 	IcmpHeader Icmp_header;
 
 private:
-	inline void		ResetHeader();
-	void			ResetPseudoHeader();
 	int				searchTable(unsigned short identifier, unsigned short sequenceNumber);
-
-	void			UpdateTable();
 };

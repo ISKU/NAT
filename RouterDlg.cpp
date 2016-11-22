@@ -86,6 +86,7 @@ CRouterDlg::CRouterDlg(CWnd* pParent /*=NULL*/)
 	m_TCPLayer->SetUpperLayer(this);
 	m_TCPLayer->SetUnderLayer(m_IPLayer);
 
+	this->SetUnderLayer(m_ICMPLayer);
 	this->SetUnderLayer(m_UDPLayer);
 	this->SetUnderLayer(m_TCPLayer);
 	/////////////////////////////////////////////////////////////////////////////////////////
