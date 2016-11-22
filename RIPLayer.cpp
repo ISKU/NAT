@@ -53,6 +53,7 @@ BOOL CRIPLayer::Send(int command, int dev_num, int resend)
 
 BOOL CRIPLayer::Receive(unsigned char* ppayload, int dev_num)
 {
+	/*
 	CRouterDlg* routerDlg = ((CRouterDlg *) GetUpperLayer(0));
 	PRipHeader pFrame = (PRipHeader) ppayload;
 	unsigned char netmask[4] = { 0xff, 0xff, 0xff , 0 };
@@ -61,7 +62,7 @@ BOOL CRIPLayer::Receive(unsigned char* ppayload, int dev_num)
 	unsigned short length = routerDlg->m_UDPLayer->GetLengthForRIP(dev_num) - 12;
 
 	if (pFrame->Rip_command == 0x01) { // command : Request를 받은 경우, command를 Response로 변경하여 다시 보냄
-		routerDlg->m_IPLayer->SetDstIP(routerDlg->m_IPLayer->GetSrcIPForRIPLayer(dev_num), dev_num);
+//		routerDlg->m_IPLayer->SetDstIP(routerDlg->m_IPLayer->GetSrcIPForRIPLayer(dev_num), dev_num);
 		routerDlg->m_EthernetLayer->SetDestinAddress(routerDlg->m_EthernetLayer->GetSourceAddressForRip(dev_num),dev_num);// 보낸 라우터의 맥주소로 설정해줌
 		Send(2, dev_num , 1);
 	}
@@ -78,7 +79,7 @@ BOOL CRIPLayer::Receive(unsigned char* ppayload, int dev_num)
 				entry = CRouterDlg::route_table.GetAt(CRouterDlg::route_table.FindIndex(selectIndex));
 				
 				// routerDlg->m_IPLayer->GetSrcIP(2) : next-hop
-
+				/*
 				// next-hop이 같은 경우
 				if (!memcmp(entry.nexthop, routerDlg->m_IPLayer->GetSrcIPForRIPLayer(dev_num), 4)) { // next-hop이 같은 경우
 					if (metric == 16 && entry.status != 2) {
@@ -99,7 +100,7 @@ BOOL CRIPLayer::Receive(unsigned char* ppayload, int dev_num)
 					if (metric < entry.metric) { // 새로운 metric수가 더 작으면 그걸로 Update
 						entry.metric = metric;
 						entry.out_interface = dev_num;
-						memcpy(&entry.nexthop, routerDlg->m_IPLayer->GetSrcIPForRIPLayer(dev_num), 4);
+//						memcpy(&entry.nexthop, routerDlg->m_IPLayer->GetSrcIPForRIPLayer(dev_num), 4);
 						entry.status = 1;
 						entry.time = 10;
 						CRouterDlg::route_table.SetAt(CRouterDlg::route_table.FindIndex(selectIndex), entry);
@@ -115,7 +116,7 @@ BOOL CRIPLayer::Receive(unsigned char* ppayload, int dev_num)
 				memcpy(entry.subnetmask, pFrame->Rip_table[index].Rip_subnetmask, 4);
 				entry.metric = metric;
 				entry.out_interface = dev_num;
-				memcpy(&entry.nexthop, routerDlg->m_IPLayer->GetSrcIPForRIPLayer(dev_num), 4);
+//				memcpy(&entry.nexthop, routerDlg->m_IPLayer->GetSrcIPForRIPLayer(dev_num), 4);
 				entry.status = 1;
 				entry.time = 10;
 				CRouterDlg::route_table.AddTail(entry);
@@ -124,7 +125,7 @@ BOOL CRIPLayer::Receive(unsigned char* ppayload, int dev_num)
 
 		routerDlg->UpdateRouteTable();
 	}
-
+	*/
 	return true;
 }
 

@@ -17,6 +17,8 @@ public:
 		unsigned char inner_addr[4];
 		unsigned char outer_addr[4];
 		unsigned short identifier;
+		unsigned short sequenceNumber;
+		unsigned int time;
 	} ICMP_ENTRY, *PICMP_ENTRY;
 
 	CICMPLayer(char* pName = NULL);
@@ -32,5 +34,7 @@ public:
 private:
 	inline void		ResetHeader();
 	void			ResetPseudoHeader();
-	int				ExistIdentifier(unsigned short identifier);
+	int				searchTable(unsigned short identifier, unsigned short sequenceNumber);
+
+	void			UpdateTable();
 };

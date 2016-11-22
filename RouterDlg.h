@@ -1,5 +1,7 @@
 #pragma once
 #include "resource.h"
+#include "TCPLayer.h"
+#include "ICMPLayer.h"
 #include "RIPLayer.h"
 #include "UDPLayer.h"
 #include "ARPLayer.h"
@@ -39,6 +41,8 @@ public: //layer
 	CIPLayer		*m_IPLayer;
 	CUDPLayer		*m_UDPLayer;
 	CRIPLayer		*m_RIPLayer;
+	CICMPLayer		*m_ICMPLayer;
+	CTCPLayer		*m_TCPLayer;
 
 	CLayerManager	 m_LayerMgr;
 	pcap_if_t *Device1;

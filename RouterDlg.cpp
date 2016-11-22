@@ -50,7 +50,8 @@ CRouterDlg::CRouterDlg(CWnd* pParent /*=NULL*/)
 	m_ARPLayer = new CARPLayer("ARP");
 	m_IPLayer = new CIPLayer("IP");
 	m_UDPLayer = new CUDPLayer("UDP"); // UDP Layer
-	m_RIPLayer = new CRIPLayer("RIP"); // RIP Layer
+	m_ICMPLayer = new CICMPLayer("ICMP"); // ICMP Layer
+	m_TCPLayer = new CTCPLayer("TCP"); // TCP Layer
 
 	// Layer 추가										
 	m_LayerMgr.AddLayer( this );				
@@ -59,22 +60,35 @@ CRouterDlg::CRouterDlg(CWnd* pParent /*=NULL*/)
 	m_LayerMgr.AddLayer( m_ARPLayer );
 	m_LayerMgr.AddLayer( m_IPLayer );
 	m_LayerMgr.AddLayer( m_UDPLayer ); // UDP Layer 추가
-	m_LayerMgr.AddLayer( m_RIPLayer ); // RIP LAyer 추가
+	m_LayerMgr.AddLayer( m_ICMPLayer ); // ICMP LAyer 추가
+	m_LayerMgr.AddLayer( m_TCPLayer ); // TCP LAyer 추가
 
 	// Layer연결 ///////////////////////////////////////////////////////////////////////////
 	m_NILayer->SetUpperLayer(m_EthernetLayer);
+
 	m_EthernetLayer->SetUpperLayer(m_IPLayer);
 	m_EthernetLayer->SetUpperLayer(m_ARPLayer);
 	m_EthernetLayer->SetUnderLayer(m_NILayer);
+
 	m_ARPLayer->SetUnderLayer(m_EthernetLayer);
+
+	m_IPLayer->SetUpperLayer(m_ICMPLayer);
+	m_IPLayer->SetUpperLayer(m_TCPLayer);
 	m_IPLayer->SetUpperLayer(m_UDPLayer);
 	m_IPLayer->SetUnderLayer(m_ARPLayer);
-	m_UDPLayer->SetUpperLayer(m_RIPLayer);
+
+	m_ICMPLayer->SetUpperLayer(this);
+	m_ICMPLayer->SetUnderLayer(m_IPLayer);
+
+	m_UDPLayer->SetUpperLayer(this);
 	m_UDPLayer->SetUnderLayer(m_IPLayer);
-	m_RIPLayer->SetUpperLayer(this);
-	m_RIPLayer->SetUnderLayer(m_UDPLayer);
-	this->SetUnderLayer(m_RIPLayer);
-	// 새롭게 추가된 UDP, RIP Layer를 연결 Ethernet-> ARP -> IP -> UDP -> RIP -> Dialog
+
+	m_TCPLayer->SetUpperLayer(this);
+	m_TCPLayer->SetUnderLayer(m_IPLayer);
+
+	this->SetUnderLayer(m_UDPLayer);
+	this->SetUnderLayer(m_TCPLayer);
+	/////////////////////////////////////////////////////////////////////////////////////////
 }
 
 void CRouterDlg::DoDataExchange(CDataExchange* pDX)
@@ -149,6 +163,8 @@ BOOL CRouterDlg::OnInitDialog()
 	ListBox_ICMPTable.InsertColumn(0,_T("Inner address"),LVCFMT_CENTER,60,-1);
 	ListBox_ICMPTable.InsertColumn(1,_T("Outer address"),LVCFMT_CENTER,120,-1);
 	ListBox_ICMPTable.InsertColumn(2,_T("Identifier"),LVCFMT_CENTER,120,-1);
+	ListBox_ICMPTable.InsertColumn(3,_T("Sequence"),LVCFMT_CENTER,120,-1);
+	ListBox_ICMPTable.InsertColumn(4,_T("Time"),LVCFMT_CENTER,120,-1);
 
 	setNicList(); //NicList Setting
 	return TRUE; // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
@@ -321,9 +337,9 @@ void CRouterDlg::OnBnClickedNicSetButton()
 	m_EthernetLayer->SetSourceAddress(OidData1->Data,1);
 	m_EthernetLayer->SetSourceAddress(OidData2->Data,2);
 
-	m_RIPLayer->Send(1, 1, 0);
-	m_RIPLayer->Send(1, 2, 0);
-	StartReadThread(); // RIP Response Thread start 30초
+	//m_RIPLayer->Send(1, 1, 0);
+	//m_RIPLayer->Send(1, 2, 0);
+	//StartReadThread(); // RIP Response Thread start 30초
 	/////////////////////////////////////////////////////////////////////
 }
 
