@@ -91,12 +91,7 @@ public:
 	afx_msg void OnLvnItemchangedRoutingTable2(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnLvnItemchangedIcmpTable(NMHDR *pNMHDR, LRESULT *pResult);
 
-	// RIP 응답 메시지 30초 Thread
 	CWinThread* pThread_1;
-	CWinThread* pThread_2;
-	CWinThread* pThread_3;
 	void StartReadThread();
-	static unsigned int WaitRipResponseMessagePacket_1(LPVOID pParam);
-	static unsigned int WaitRipResponseMessagePacket_2(LPVOID pParam);
 	static unsigned int TableCheck(LPVOID pParam);
 };

@@ -265,7 +265,7 @@ void CRouterDlg::OnBnClickedNicSetButton()
 	char strError[30];
 
 	if(pcap_findalldevs_ex( PCAP_SRC_IF_STRING, NULL , &Devices , strError) != 0)
-		printf("pcap_findalldevs_ex() error : %s\n", strError);\
+		printf("pcap_findalldevs_ex() error : %s\n", strError);
 
 	m_nic1.GetLBText(m_nic1.GetCurSel() , DeviceName1);	// 콤보 박스에 선택된 Device의 이름을 얻어옴
 	m_nic2.GetLBText(m_nic2.GetCurSel() , DeviceName2);
@@ -294,36 +294,6 @@ void CRouterDlg::OnBnClickedNicSetButton()
 	m_nic1_ip.GetAddress((BYTE &)nic1_ip[0],(BYTE &)nic1_ip[1],(BYTE &)nic1_ip[2],(BYTE &)nic1_ip[3]);
 	m_nic2_ip.GetAddress((BYTE &)nic2_ip[0],(BYTE &)nic2_ip[1],(BYTE &)nic2_ip[2],(BYTE &)nic2_ip[3]);
 
-	// 자기 자신의 라우팅 정보 업데이트
-	unsigned char netmask[4] = { 0xff, 0xff, 0xff , 0 };
-	
-	RoutingTable rt1;
-	for(int i=0; i<4; i++)
-		rt1.ipAddress[i] = nic1_ip[i] & netmask[i];
-	memcpy(rt1.subnetmask, netmask, 4);
-	rt1.metric = 0x0;
-	rt1.out_interface = 1;
-	memset(&rt1.nexthop, 0, 4);
-	rt1.status = 0;
-
-	RoutingTable rt2;
-	for(int i=0; i<4; i++)
-		rt2.ipAddress[i] = nic2_ip[i] & netmask[i];
-	memcpy(rt2.subnetmask, netmask, 4);
-	rt2.metric = 0x0;
-	rt2.out_interface = 2;
-	memset(&rt2.nexthop, 0, 4);
-	rt2.status = 0;
-
-	route_table.AddTail(rt1);
-	route_table.AddTail(rt2);
-	UpdateRouteTable();
-	////////////////////////////////////////////////////////////////////////
-
-	m_NILayer->StartReadThread();	// receive Thread start
-	GetDlgItem(IDC_NIC_SET_BUTTON)->EnableWindow(0);
-
-	// 라우터 부팅시 request rip packet 전달
 	unsigned char broadcast[4];
 	memset(broadcast,0xff,4);
 	unsigned char macbroadcast[6];
@@ -338,10 +308,9 @@ void CRouterDlg::OnBnClickedNicSetButton()
 	m_EthernetLayer->SetSourceAddress(OidData1->Data,1);
 	m_EthernetLayer->SetSourceAddress(OidData2->Data,2);
 
-	//m_RIPLayer->Send(1, 1, 0);
-	//m_RIPLayer->Send(1, 2, 0);
-	//StartReadThread(); // RIP Response Thread start 30초
-	/////////////////////////////////////////////////////////////////////
+	m_NILayer->StartReadThread();	// receive Thread start
+	// StartReadThread(); // Router Table Thread Start
+	GetDlgItem(IDC_NIC_SET_BUTTON)->EnableWindow(0);
 }
 
 // NicList Set
@@ -433,45 +402,12 @@ void CRouterDlg::OnLvnItemchangedRoutingTable2(NMHDR *pNMHDR, LRESULT *pResult)
 	*pResult = 0;
 }
 
-// 30초마다 RIP 응답 패킷을 보낸다
 void CRouterDlg::StartReadThread()
 {
-	pThread_1 = AfxBeginThread(WaitRipResponseMessagePacket_1 , this);
-	//pThread_2 = AfxBeginThread(WaitRipResponseMessagePacket_2 , this);
-	pThread_3 = AfxBeginThread(TableCheck , this);
+	pThread_1 = AfxBeginThread(TableCheck , this);
 
-	if(pThread_1 == NULL || pThread_3 == NULL) {
+	if(pThread_1 == NULL)
 		AfxMessageBox("Read 쓰레드 생성 실패");
-	}
-	/*
-	if(pThread_1 == NULL || pThread_2 == NULL || pThread_3 == NULL) {
-		AfxMessageBox("Read 쓰레드 생성 실패");
-	}
-	*/
-}
-
-unsigned int CRouterDlg::WaitRipResponseMessagePacket_1(LPVOID pParam) 
-{
-	CRouterDlg *temp_CRouterDlgLayer = (CRouterDlg*)pParam;
-
-	while(1) {
-		Sleep(7000);
-		temp_CRouterDlgLayer->GetUnderLayer()->Send(2, 1, 0);
-		temp_CRouterDlgLayer->GetUnderLayer()->Send(2, 2, 0);
-	}
-
-	return 0;
-}
-
-unsigned int CRouterDlg::WaitRipResponseMessagePacket_2(LPVOID pParam){
-	CRouterDlg *temp_CRouterDlgLayer = (CRouterDlg*)pParam;
-
-	while(1) {
-		Sleep(7000);
-		temp_CRouterDlgLayer->GetUnderLayer()->Send(2, 2, 0);
-	}
-
-	return 0;
 }
 
 unsigned int CRouterDlg::TableCheck(LPVOID pParam){
@@ -507,7 +443,6 @@ unsigned int CRouterDlg::TableCheck(LPVOID pParam){
 
 	return 0;
 }
-///////////////////////////////////////////////////////////////////////////////////
 
 void CRouterDlg::OnLvnItemchangedIcmpTable(NMHDR *pNMHDR, LRESULT *pResult)
 {
