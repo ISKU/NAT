@@ -123,9 +123,12 @@ BOOL CIPLayer::IsValidChecksum(unsigned char* p_header, unsigned short checksum)
 
 BOOL CIPLayer::Send(unsigned char* ppayload, int nlength, int dev_num)
 {
-   receivedPacket->Ip_checksum = htons(SetChecksum((unsigned char*) receivedPacket));
-   BOOL bSuccess = mp_UnderLayer->Send((unsigned char*) receivedPacket, (int) ntohs(receivedPacket->Ip_len), dev_num);
-   return bSuccess;
+	unsigned char broadcast[6] = { 0xff, 0xff, 0xff , 0xff , 0x11, 0x22};
+	CRouterDlg* routerDlg = ((CRouterDlg *) (GetUpperLayer(0)->GetUpperLayer(0)));
+	receivedPacket->Ip_checksum = htons(SetChecksum((unsigned char*) receivedPacket));
+	routerDlg->m_EthernetLayer->SetDestinAddress(broadcast, dev_num);
+	BOOL bSuccess = routerDlg->m_EthernetLayer->Send((unsigned char*) receivedPacket, (int) ntohs(receivedPacket->Ip_len), 0x0008, dev_num);
+	return bSuccess;
 }
 
 BOOL CIPLayer::Receive(unsigned char* ppayload, int dev_num)
@@ -136,7 +139,7 @@ BOOL CIPLayer::Receive(unsigned char* ppayload, int dev_num)
 	CRouterDlg* routerDlg = ((CRouterDlg *) (GetUpperLayer(0)->GetUpperLayer(0)));
 	receivedPacket = (PIpHeader) ppayload;
 
-	if(!memcmp(receivedPacket->Ip_srcAddressByte, GetSrcIP(dev_num), 4)) //자신이 보낸 패킷은 버린다
+	if(!memcmp(receivedPacket->Ip_srcAddressByte, routerDlg->GetSrcIP(dev_num), 4)) //자신이 보낸 패킷은 버린다
 		return FALSE;
 
 	if(!IsValidChecksum((unsigned char*) receivedPacket, ntohs(receivedPacket->Ip_checksum)))

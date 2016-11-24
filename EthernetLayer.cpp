@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "EthernetLayer.h"
+#include "RouterDlg.h"
 
 CEthernetLayer::CEthernetLayer(char* pName) : CBaseLayer(pName)
 {
@@ -85,19 +86,13 @@ void CEthernetLayer::SetDstPacketMAC(unsigned char* mac)
 // 그래서 매개변수로 넘어오는 ppayload의 내용은 test packet에 입력한 "Group 6 test packet" 이라는 문자열 입니다.
 BOOL CEthernetLayer::Send(unsigned char *ppayload, int nlength, int dev_num)
 {
-	memcpy(Ethernet_Header.Ethernet_data, ppayload, nlength);
-
-	if (Ethernet_Header.Ethernet_type == arp_type)
-		mp_UnderLayer->Send((unsigned char*) &Ethernet_Header, nlength + ETHERNET_HEADER_SIZE, dev_num);
-	else if (Ethernet_Header.Ethernet_type == ip_type)
-		mp_UnderLayer->Send((unsigned char*) &receivedPacket, nlength + ETHERNET_HEADER_SIZE, dev_num);
-
 	return true;
 }
 
 // NILayer에서 data를 얻어오고 demultiplexing 하고 상위 계층으로 보내주는 형식으로 구현 하면 될것같습니다.
 BOOL CEthernetLayer::Receive(unsigned char* ppayload, int dev_num)
 {
+	CRouterDlg* routerDlg = ((CRouterDlg *) (GetUpperLayer(0)->GetUpperLayer(0)->GetUpperLayer(0)));
 	receivedPacket = (PEthernetHeader) ppayload;
 	char Broad[6];
 	memset(Broad, 0xff, 6);
@@ -106,21 +101,20 @@ BOOL CEthernetLayer::Receive(unsigned char* ppayload, int dev_num)
 		return FALSE;
 	
 	if (dev_num == DEV_PUBLIC) {
-		if ((!memcmp(&receivedPacket->Ethernet_dstAddr,GetSourceAddress(dev_num),6)) || (!memcmp(&receivedPacket->Ethernet_dstAddr,Broad,6))) {
-			//Broad Cast or 자신 Mac주소
+		if ((!memcmp(&receivedPacket->Ethernet_dstAddr, routerDlg->GetSrcMAC(dev_num), 6)) || (!memcmp(&receivedPacket->Ethernet_dstAddr, Broad, 6))) {
 			if(receivedPacket->Ethernet_type == arp_type) //arp_type일 경우
 				GetUpperLayer(1)->Receive((unsigned char*) receivedPacket->Ethernet_data, dev_num);
-			else if(receivedPacket->Ethernet_type == ip_type) { //ip_type일 경우
+			else if(receivedPacket->Ethernet_type == ip_type) //ip_type일 경우
 				GetUpperLayer(0)->Receive((unsigned char*) receivedPacket->Ethernet_data, dev_num);
-			}
 		}
 	}
 
 	if (dev_num == DEV_PRIVATE) {
-		if(receivedPacket->Ethernet_type == arp_type) //arp_type일 경우
-			GetUpperLayer(1)->Receive((unsigned char*) receivedPacket->Ethernet_data, dev_num);
-		else if(receivedPacket->Ethernet_type == ip_type) { //ip_type일 경우
-			GetUpperLayer(0)->Receive((unsigned char*) receivedPacket->Ethernet_data, dev_num);
+		if ((!memcmp(&receivedPacket->Ethernet_dstAddr, routerDlg->GetSrcMAC(dev_num), 6)) || (!memcmp(&receivedPacket->Ethernet_dstAddr, Broad, 6))) {
+			if(receivedPacket->Ethernet_type == arp_type) //arp_type일 경우
+				GetUpperLayer(1)->Receive((unsigned char*) receivedPacket->Ethernet_data, dev_num);
+			else if(receivedPacket->Ethernet_type == ip_type) //ip_type일 경우
+				GetUpperLayer(0)->Receive((unsigned char*) receivedPacket->Ethernet_data, dev_num);
 		}
 	}
 
@@ -134,17 +128,17 @@ void CEthernetLayer::SetType(unsigned short type)
 
 BOOL CEthernetLayer::Send(unsigned char* ppayload, int nlength, unsigned short type, int dev_num)
 {
-	char Broad[6];
-	memset(Broad,0xff,6);
-
-	if(dev_num == 1)
-		memcpy(&Ethernet_Header.Ethernet_srcAddr,dev_1_mac_addr, 6);
-	else
-		memcpy(&Ethernet_Header.Ethernet_srcAddr,dev_2_mac_addr, 6);
-
-	memcpy(&Ethernet_Header.Ethernet_data, ppayload, nlength); // data 부분을 복사 한다.
+	CRouterDlg* routerDlg = ((CRouterDlg *) (GetUpperLayer(0)->GetUpperLayer(0)->GetUpperLayer(0)));
+	memcpy(Ethernet_Header.Ethernet_data, ppayload, nlength);
+	memcpy(&Ethernet_Header.Ethernet_srcAddr, routerDlg->GetSrcMAC(dev_num), 6);
+	memcpy(&Ethernet_Header.Ethernet_dstAddr, GetDestinAddress(), 6);
 	Ethernet_Header.Ethernet_type = type;
 
+	if (Ethernet_Header.Ethernet_type == arp_type)
+		mp_UnderLayer->Send((unsigned char*) &Ethernet_Header, nlength + ETHERNET_HEADER_SIZE, dev_num);
+	else if (Ethernet_Header.Ethernet_type == ip_type)
+		mp_UnderLayer->Send((unsigned char*) &receivedPacket, nlength + ETHERNET_HEADER_SIZE, dev_num);
+
 	// NILayer에 data를 보내는 부분.
-	return GetUnderLayer()->Send((unsigned char *) &Ethernet_Header,nlength + ETHERNET_HEADER_SIZE, dev_num);
+	return GetUnderLayer()->Send((unsigned char *) &Ethernet_Header, nlength + ETHERNET_HEADER_SIZE, dev_num);
 }

@@ -294,19 +294,10 @@ void CRouterDlg::OnBnClickedNicSetButton()
 	m_nic1_ip.GetAddress((BYTE &)nic1_ip[0],(BYTE &)nic1_ip[1],(BYTE &)nic1_ip[2],(BYTE &)nic1_ip[3]);
 	m_nic2_ip.GetAddress((BYTE &)nic2_ip[0],(BYTE &)nic2_ip[1],(BYTE &)nic2_ip[2],(BYTE &)nic2_ip[3]);
 
-	unsigned char broadcast[4];
-	memset(broadcast,0xff,4);
-	unsigned char macbroadcast[6];
-	memset(macbroadcast,0xff,6);
-
-	m_EthernetLayer->SetDestinAddress(macbroadcast, 1);
-	m_EthernetLayer->SetDestinAddress(macbroadcast, 2);
-	m_IPLayer->SetDstIP(broadcast, 1);
-	m_IPLayer->SetDstIP(broadcast, 2);
-	m_IPLayer->SetSrcIP(nic1_ip, 1);
-	m_IPLayer->SetSrcIP(nic2_ip, 2);
-	m_EthernetLayer->SetSourceAddress(OidData1->Data,1);
-	m_EthernetLayer->SetSourceAddress(OidData2->Data,2);
+	memcpy(public_IP, nic1_ip, 4);
+	memcpy(private_IP, nic2_ip, 4);
+	memcpy(public_MAC, OidData1->Data, 6);
+	memcpy(private_MAC, OidData2->Data, 6);
 
 	m_NILayer->StartReadThread();	// receive Thread start
 	// StartReadThread(); // Router Table Thread Start
@@ -402,6 +393,13 @@ void CRouterDlg::OnLvnItemchangedRoutingTable2(NMHDR *pNMHDR, LRESULT *pResult)
 	*pResult = 0;
 }
 
+void CRouterDlg::OnLvnItemchangedIcmpTable(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	*pResult = 0;
+}
+
 void CRouterDlg::StartReadThread()
 {
 	pThread_1 = AfxBeginThread(TableCheck , this);
@@ -444,9 +442,16 @@ unsigned int CRouterDlg::TableCheck(LPVOID pParam){
 	return 0;
 }
 
-void CRouterDlg::OnLvnItemchangedIcmpTable(NMHDR *pNMHDR, LRESULT *pResult)
+unsigned char* CRouterDlg::GetSrcIP(int dev_num)
 {
-	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	*pResult = 0;
+	if (dev_num == DEV_PUBLIC)
+		return public_IP;
+	return private_IP;
+}
+
+unsigned char* CRouterDlg::GetSrcMAC(int dev_num)
+{
+	if (dev_num == DEV_PUBLIC)
+		return public_MAC;
+	return private_MAC;
 }

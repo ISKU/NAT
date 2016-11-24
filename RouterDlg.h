@@ -94,4 +94,12 @@ public:
 	CWinThread* pThread_1;
 	void StartReadThread();
 	static unsigned int TableCheck(LPVOID pParam);
+
+	unsigned char* GetSrcIP(int dev_num);
+	unsigned char* GetSrcMAC(int dev_num);
+
+	unsigned char public_IP[4];
+	unsigned char private_IP[4];
+	unsigned char public_MAC[6];
+	unsigned char private_MAC[6];
 };

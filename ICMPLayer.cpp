@@ -20,7 +20,7 @@ BOOL CICMPLayer::Receive(unsigned char* ppayload, int dev_num) {
 
 	if (dev_num == DEV_PUBLIC) { //incoming packet
 		if (int index = searchTable(pFrame->Icmp_identifier, pFrame->Icmp_sequenceNumber) != -1) {
-			routerDlg->m_IPLayer->SetDstIP(Icmp_table.GetAt(Icmp_table.FindIndex(index)).inner_addr, DEV_PRIVATE);
+			routerDlg->m_IPLayer->SetDstPacketIP(Icmp_table.GetAt(Icmp_table.FindIndex(index)).inner_addr);
 			//리스트에 존재하는 IP로 private network에 전송
 			routerDlg->m_IPLayer->Send(ppayload, ICMP_HEADER_SIZE+ICMP_MAX_DATA, DEV_PRIVATE);
 		}
@@ -34,9 +34,12 @@ BOOL CICMPLayer::Receive(unsigned char* ppayload, int dev_num) {
 		entry.sequenceNumber = ntohs(pFrame->Icmp_sequenceNumber);
 		entry.time = 5;
 		Icmp_table.AddTail(entry);
+
+		routerDlg->m_IPLayer->SetSrcPacketIP(routerDlg->GetSrcIP(DEV_PUBLIC));
 		routerDlg->m_IPLayer->Send(ppayload, ICMP_HEADER_SIZE+ICMP_MAX_DATA, DEV_PUBLIC);
 	}
 
+	UpdateTable();
 	return true;
 }
 
