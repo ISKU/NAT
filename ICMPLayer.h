@@ -1,5 +1,6 @@
 #pragma once
 #include "baselayer.h"
+#include "afxmt.h"
 
 class CICMPLayer : public CBaseLayer
 {
@@ -27,11 +28,13 @@ public:
 	BOOL Send(unsigned char* ppayload, int nlength, int dev_num);
 	BOOL Receive(unsigned char* ppayload, int dev_num);
 	void UpdateTable();
+	static unsigned int IcmpTableCheck(LPVOID pParam);
 
-	CList<ICMP_ENTRY,ICMP_ENTRY&> Icmp_table;
-
+	static CList<ICMP_ENTRY,ICMP_ENTRY&> Icmp_table;
 	IcmpHeader Icmp_header;
 
+	CWinThread* pThread_1;
+	void StartReadThread();
 private:
 	int				searchTable(unsigned short identifier, unsigned short sequenceNumber);
 };
