@@ -63,26 +63,6 @@ void CEthernetLayer::SetDestinAddress(unsigned char *pAddress, int dev_num)
 	//인자로 받은 paddress의 값을 복사한다.
 }
 
-unsigned char* CEthernetLayer::GetSrcFromPacket()
-{
-	return receivedPacket->Ethernet_srcAddr.addr_ethernet;
-}
-
-unsigned char* CEthernetLayer::GetDstFromPacket()
-{
-	return receivedPacket->Ethernet_dstAddr.addr_ethernet;
-}
-
-void CEthernetLayer::SetSrcPacketMAC(unsigned char* mac)
-{
-	memcpy(receivedPacket->Ethernet_srcAddr.addr_ethernet, mac, 6);
-}
-
-void CEthernetLayer::SetDstPacketMAC(unsigned char* mac)
-{
-	memcpy(receivedPacket->Ethernet_dstAddr.addr_ethernet, mac, 6);
-}
-
 // 그래서 매개변수로 넘어오는 ppayload의 내용은 test packet에 입력한 "Group 6 test packet" 이라는 문자열 입니다.
 BOOL CEthernetLayer::Send(unsigned char *ppayload, int nlength, int dev_num)
 {
@@ -93,28 +73,28 @@ BOOL CEthernetLayer::Send(unsigned char *ppayload, int nlength, int dev_num)
 BOOL CEthernetLayer::Receive(unsigned char* ppayload, int dev_num)
 {
 	CRouterDlg* routerDlg = ((CRouterDlg *) (GetUpperLayer(0)->GetUpperLayer(0)->GetUpperLayer(0)));
-	receivedPacket = (PEthernetHeader) ppayload;
+	PEthernetHeader pFrame = (PEthernetHeader) ppayload;
 	char Broad[6];
 	memset(Broad, 0xff, 6);
 	
-	if(!memcmp(&receivedPacket->Ethernet_srcAddr,GetSourceAddress(dev_num),6)) //자신에게 보낸 페킷
+	if(!memcmp(&pFrame->Ethernet_srcAddr,GetSourceAddress(dev_num),6)) //자신에게 보낸 페킷
 		return FALSE;
 	
 	if (dev_num == DEV_PUBLIC) {
-		if ((!memcmp(&receivedPacket->Ethernet_dstAddr, routerDlg->GetSrcMAC(dev_num), 6)) || (!memcmp(&receivedPacket->Ethernet_dstAddr, Broad, 6))) {
-			if(receivedPacket->Ethernet_type == arp_type) //arp_type일 경우
-				GetUpperLayer(1)->Receive((unsigned char*) receivedPacket->Ethernet_data, dev_num);
-			else if(receivedPacket->Ethernet_type == ip_type) //ip_type일 경우
-				GetUpperLayer(0)->Receive((unsigned char*) receivedPacket->Ethernet_data, dev_num);
+		if ((!memcmp(&pFrame->Ethernet_dstAddr, routerDlg->GetSrcMAC(dev_num), 6)) || (!memcmp(&pFrame->Ethernet_dstAddr, Broad, 6))) {
+			if(pFrame->Ethernet_type == arp_type) //arp_type일 경우
+				GetUpperLayer(1)->Receive((unsigned char*) pFrame->Ethernet_data, dev_num);
+			else if(pFrame->Ethernet_type == ip_type) //ip_type일 경우
+				GetUpperLayer(0)->Receive((unsigned char*) pFrame->Ethernet_data, dev_num);
 		}
 	}
 
 	if (dev_num == DEV_PRIVATE) {
-		if ((!memcmp(&receivedPacket->Ethernet_dstAddr, routerDlg->GetSrcMAC(dev_num), 6)) || (!memcmp(&receivedPacket->Ethernet_dstAddr, Broad, 6))) {
-			if(receivedPacket->Ethernet_type == arp_type) //arp_type일 경우
-				GetUpperLayer(1)->Receive((unsigned char*) receivedPacket->Ethernet_data, dev_num);
-			else if(receivedPacket->Ethernet_type == ip_type) //ip_type일 경우
-				GetUpperLayer(0)->Receive((unsigned char*) receivedPacket->Ethernet_data, dev_num);
+		if ((!memcmp(&pFrame->Ethernet_dstAddr, routerDlg->GetSrcMAC(dev_num), 6)) || (!memcmp(&pFrame->Ethernet_dstAddr, Broad, 6))) {
+			if(pFrame->Ethernet_type == arp_type) //arp_type일 경우
+				GetUpperLayer(1)->Receive((unsigned char*) pFrame->Ethernet_data, dev_num);
+			else if(pFrame->Ethernet_type == ip_type) //ip_type일 경우
+				GetUpperLayer(0)->Receive((unsigned char*) pFrame->Ethernet_data, dev_num);
 		}
 	}
 
@@ -137,7 +117,7 @@ BOOL CEthernetLayer::Send(unsigned char* ppayload, int nlength, unsigned short t
 	if (Ethernet_Header.Ethernet_type == arp_type)
 		mp_UnderLayer->Send((unsigned char*) &Ethernet_Header, nlength + ETHERNET_HEADER_SIZE, dev_num);
 	else if (Ethernet_Header.Ethernet_type == ip_type)
-		mp_UnderLayer->Send((unsigned char*) &receivedPacket, nlength + ETHERNET_HEADER_SIZE, dev_num);
+		mp_UnderLayer->Send((unsigned char*) &Ethernet_Header, nlength + ETHERNET_HEADER_SIZE, dev_num);
 
 	// NILayer에 data를 보내는 부분.
 	return GetUnderLayer()->Send((unsigned char *) &Ethernet_Header, nlength + ETHERNET_HEADER_SIZE, dev_num);

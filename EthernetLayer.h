@@ -16,10 +16,6 @@ public:
 	void			SetSourceAddress(unsigned char* pAddress, int dev_num);
 	unsigned char*	GetDestinAddress();
 	unsigned char*	GetSourceAddress(int dev_num);
-	void SetSrcPacketMAC(unsigned char* mac);
-	void SetDstPacketMAC(unsigned char* mac);
-	unsigned char* GetSrcFromPacket();
-	unsigned char* GetDstFromPacket();
 
 	//mac2
 	void SetType(unsigned short type);
@@ -57,6 +53,4 @@ public:
 	
 	//protected:
 	EthernetHeader	Ethernet_Header; // Ethernet header에 대한 구조체 변수를 선언해 놓는다.
-
-	PEthernetHeader receivedPacket;
 };
