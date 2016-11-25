@@ -4,7 +4,6 @@
 
 CUDPLayer::CUDPLayer(char* pName) : CBaseLayer(pName)
 {
-	ResetHeader();
 	ResetPseudoHeader();
 }
 
@@ -66,7 +65,7 @@ unsigned short CUDPLayer::GetLengthForRIP(int dev_num)
 
 void CUDPLayer::SetSendPseudoHeader(unsigned short length, int dev_num)
 {
-	CRouterDlg * routerDlg =  ((CRouterDlg *) GetUpperLayer(0));
+	CRouterDlg* routerDlg =  ((CRouterDlg*) GetUpperLayer(0));
 
 	memcpy(Udp_pseudo_header.Pseudo_srcIp, routerDlg->m_IPLayer->GetSrcIP(dev_num), 4);
 	memcpy(Udp_pseudo_header.Pseudo_dstIp, routerDlg->m_IPLayer->GetDstIP(dev_num), 4);
@@ -178,12 +177,28 @@ BOOL CUDPLayer::Receive(unsigned char* ppayload, int dev_num)
 	return true;
 }
 
-void CUDPLayer::ResetHeader()
-{
-	Udp_header.Udp_srcPort = 0x0802; // int 520 
-	Udp_header.Udp_dstPort = 0x0802; // int 520
-	Udp_header.Udp_length = 0x8; // header + data length (default udp header length)
-	Udp_header.Udp_checksum = 0x00; // checksum
+int CUDPLayer::OutgoingSearchTable(unsigned char inner_addr[4], unsigned short inner_port) {
+	CRouterDlg::NAT_ENTRY entry;
+	int size = CRouterDlg::nat_table.GetCount();
+
+	for(int index = 0; index < size; index++) {
+		entry = CRouterDlg::nat_table.GetAt(CRouterDlg::nat_table.FindIndex(index));
+		if (!memcmp(entry.inner_addr, inner_addr, 4) && entry.inner_port == inner_port) 
+			return index;
+	}
+	return -1;
+}
+
+int CUDPLayer::IncomingSearchTable(unsigned short outer_port) {
+	CRouterDlg::NAT_ENTRY entry;
+	int size = CRouterDlg::nat_table.GetCount();
+
+	for(int index = 0; index < size; index++) {
+		entry = CRouterDlg::nat_table.GetAt(CRouterDlg::nat_table.FindIndex(index));
+		if (entry.outer_port == outer_port) 
+			return index;
+	}
+	return -1;
 }
 
 void CUDPLayer::ResetPseudoHeader()

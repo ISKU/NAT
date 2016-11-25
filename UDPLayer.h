@@ -40,14 +40,13 @@ public:
 		unsigned short Pseudo_length;
 	} UdpPseudoHeader, *PUdpPseudoHeader;
 
-	UdpHeader Udp_header;
 	UdpPseudoHeader Udp_pseudo_header;
 
 private:
 	inline void		ResetHeader();
 	void			ResetPseudoHeader();
-
-private:
+	int IncomingSearchTable(char inner_addr[4], unsigned short inner_port);
+	int OutgoingSearchTable(unsigned short outer_port);
 	unsigned short dev_1_length;
 	unsigned short dev_2_length;
 	unsigned short dev_1_length_for_rip;

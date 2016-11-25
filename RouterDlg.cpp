@@ -12,7 +12,7 @@
 #endif
 
 // 2개의 route_table (RouterDlg.h에 static으로 선언하여 route_table 멤버는 클래스 외부에 선언 본체는 Dialog가 가지고 있다)
-CList<CRouterDlg::RoutingTable, CRouterDlg::RoutingTable&> CRouterDlg::route_table;
+CList<CRouterDlg::NAT_ENTRY, CRouterDlg::NAT_ENTRY&> CRouterDlg::nat_table;
 
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
 class CAboutDlg : public CDialog
@@ -96,7 +96,7 @@ CRouterDlg::CRouterDlg(CWnd* pParent /*=NULL*/)
 void CRouterDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_ROUTING_TABLE, ListBox_RoutingTable);
+	DDX_Control(pDX, IDC_ROUTING_TABLE, ListBox_NatTable);
 	DDX_Control(pDX, IDC_CACHE_TABLE, ListBox_ARPCacheTable);
 	DDX_Control(pDX, IDC_ICMP_TABLE, ListBox_ICMPTable);
 	DDX_Control(pDX, IDC_NIC1_COMBO, m_nic1);
@@ -148,12 +148,12 @@ BOOL CRouterDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE); // 작은 아이콘을 설정합니다.
 
 	// ListBox에 초기 Colum을 삽입
-	ListBox_RoutingTable.InsertColumn(0, _T(""), LVCFMT_CENTER, 0, -1);
-	ListBox_RoutingTable.InsertColumn(1,_T("Inner address"),LVCFMT_CENTER, 150, -1);
-	ListBox_RoutingTable.InsertColumn(2,_T("Inner port"),LVCFMT_CENTER, 110, -1);
-	ListBox_RoutingTable.InsertColumn(3,_T("Outer address"),LVCFMT_CENTER, 150, -1);
-	ListBox_RoutingTable.InsertColumn(4,_T("Status"),LVCFMT_CENTER, 100, -1);
-	ListBox_RoutingTable.InsertColumn(5,_T("Time"),LVCFMT_CENTER, 103, -1);
+	ListBox_NatTable.InsertColumn(0, _T(""), LVCFMT_CENTER, 0, -1);
+	ListBox_NatTable.InsertColumn(1,_T("Inner address"),LVCFMT_CENTER, 150, -1);
+	ListBox_NatTable.InsertColumn(2,_T("Inner port"),LVCFMT_CENTER, 110, -1);
+	ListBox_NatTable.InsertColumn(3,_T("Outer address"),LVCFMT_CENTER, 150, -1);
+	ListBox_NatTable.InsertColumn(4,_T("Status"),LVCFMT_CENTER, 100, -1);
+	ListBox_NatTable.InsertColumn(5,_T("Time"),LVCFMT_CENTER, 103, -1);
 
 	ListBox_ARPCacheTable.InsertColumn(0,_T(""),LVCFMT_CENTER,0,-1);
 	ListBox_ARPCacheTable.InsertColumn(1,_T("IP address"),LVCFMT_CENTER,180,-1);
@@ -326,9 +326,9 @@ void CRouterDlg::setNicList(void)
 }	
 
 // UpdateRouteTable
-void CRouterDlg::UpdateRouteTable()
+void CRouterDlg::UpdateNatTable()
 {
-	RoutingTable entry;
+	/*RoutingTable entry;
 	CString tableNumber, ipAddress, metric, out_interface, nexthop, subnetmask, status, time;
 	int size = route_table.GetCount();
 
@@ -366,7 +366,7 @@ void CRouterDlg::UpdateRouteTable()
 		ListBox_RoutingTable.SetItem(index, 7, LVIF_TEXT, time, 0, 0, 0, NULL);
 		
 		ListBox_RoutingTable.UpdateWindow();
-	}
+	}*/
 }
 
 void CRouterDlg::OnCbnSelchangeNic1Combo()
@@ -496,7 +496,7 @@ void CRouterDlg::StartReadThread()
 }
 
 unsigned int CRouterDlg::TableCheck(LPVOID pParam){
-	CList<RoutingTable, RoutingTable&> *temp_route_table;
+	/*CList<RoutingTable, RoutingTable&> *temp_route_table;
 	RoutingTable entry;
 
 	while(1) {
@@ -526,7 +526,7 @@ unsigned int CRouterDlg::TableCheck(LPVOID pParam){
 		Sleep(10000);
 	}
 
-	return 0;
+	return 0;*/
 }
 
 unsigned char* CRouterDlg::GetSrcIP(int dev_num)

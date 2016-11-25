@@ -33,5 +33,5 @@ public:
 	IcmpHeader Icmp_header;
 
 private:
-	int				searchTable(unsigned short identifier, unsigned short sequenceNumber);
+	int	searchTable(unsigned short identifier, unsigned short sequenceNumber);
 };

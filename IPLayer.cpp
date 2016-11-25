@@ -3,8 +3,7 @@
 #include "RouterDlg.h"
 
 CIPLayer::CIPLayer(char* pName) : CBaseLayer(pName) 
-{ 
-	ResetHeader();
+{
 }
 
 CIPLayer::~CIPLayer() 
@@ -13,36 +12,15 @@ CIPLayer::~CIPLayer()
 
 void CIPLayer::SetDstIP(unsigned char* ip, int dev_num)
 {
-	if(dev_num == 1)
-		memcpy(dev_1_dst_ip_addr, ip , 4 );
-	else
-		memcpy(dev_2_dst_ip_addr, ip , 4 );
-
-	memcpy(&Ip_header.Ip_dstAddress,ip,4);
-}
-
-void CIPLayer::SetSrcIP(unsigned char* ip ,int dev_num)
-{
-	if(dev_num == 1)
-		memcpy(dev_1_ip_addr , ip , 4 );
-	else
-		memcpy(dev_2_ip_addr , ip , 4 );
-
-	memcpy(&Ip_header.Ip_srcAddress,ip,4);
+	memcpy(receivedPacket->Ip_dstAddressByte, ip, 4);
 }
 
 unsigned char* CIPLayer::GetDstIP(int dev_num)
 {
-	if(dev_num == 1)
+	return receivedPacket->Ip_dstAddressByte;
+	/*if(dev_num == 1)
 		return dev_1_dst_ip_addr;
-	return dev_2_dst_ip_addr;
-}
-
-unsigned char* CIPLayer::GetSrcIP(int dev_num)
-{
-	if(dev_num == 1)
-		return dev_1_ip_addr;
-	return dev_2_ip_addr;
+	return dev_2_dst_ip_addr;*/
 }
 
 unsigned char* CIPLayer::GetSrcFromPacket()
@@ -63,23 +41,6 @@ void CIPLayer::SetSrcPacketIP(unsigned char* ip)
 void CIPLayer::SetDstPacketIP(unsigned char* ip)
 {
 	memcpy(receivedPacket->Ip_dstAddressByte, ip, 4);
-}
-
-unsigned char CIPLayer::GetProtocol(int dev_num) 
-{
-	if(dev_num == 1)
-		return dev_1_protocol;
-	return dev_2_protocol;
-}
-
-void CIPLayer::SetProtocol(unsigned char protocol, int dev_num)
-{
-	if(dev_num == 1)
-		dev_1_protocol = protocol;
-	else
-		dev_2_protocol = protocol;
-
-	Ip_header.Ip_protocol = protocol;
 }
 
 unsigned short CIPLayer::SetChecksum(unsigned char p_header[20])
@@ -163,35 +124,4 @@ BOOL CIPLayer::Receive(unsigned char* ppayload, int dev_num)
 	}
 
 	return FALSE;
-}
-
-void CIPLayer::ResetHeader( )
-{
-	Ip_header.Ip_version = 0x45; // version, header length
-	Ip_header.Ip_typeOfService = 0x00;
-	Ip_header.Ip_len = 0x0014; // 20byte default
-	Ip_header.Ip_id = 0x0000;		
-	Ip_header.Ip_fragmentOffset = 0x0000;
-	Ip_header.Ip_timeToLive = 0x05; // ttl default
-	Ip_header.Ip_protocol = 0x00; // setting
-	Ip_header.Ip_checksum = 0x0000; 
-	memset(Ip_header.Ip_srcAddressByte, 0, 4);
-	memset(Ip_header.Ip_dstAddressByte, 0, 4);
-	memset(Ip_header.Ip_data, 0, IP_MAX_DATA);
-}
-
-int CIPLayer::Forwarding(unsigned char destip[4]) 
-{
-	CRouterDlg::RoutingTable entry;
-	int size = CRouterDlg::route_table.GetCount();
-	unsigned char networkid[4];
-
-	for(int index = 0; index < size; index++) {
-		entry = CRouterDlg::route_table.GetAt(CRouterDlg::route_table.FindIndex(index));
-		for(int i = 0; i < 4; i++)
-			networkid[i] = destip[i] & entry.subnetmask[i];
-		if(!memcmp(networkid, entry.ipAddress,  4)) 
-			return index; // IP가 일치하는 Entry가 존재하면 그 index return.
-	}
-	return -1;
 }
