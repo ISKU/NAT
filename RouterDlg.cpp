@@ -301,6 +301,7 @@ void CRouterDlg::OnBnClickedNicSetButton()
 	memcpy(private_MAC, OidData2->Data, 6);
 
 	m_NILayer->StartReadThread();	// receive Thread start
+	m_ICMPLayer->StartReadThread();
 	// StartReadThread(); // Router Table Thread Start
 	GetDlgItem(IDC_NIC_SET_BUTTON)->EnableWindow(0);
 }
@@ -494,6 +495,7 @@ void CRouterDlg::StartReadThread()
 	if(pThread_1 == NULL)
 		AfxMessageBox("Read 쓰레드 생성 실패");
 }
+
 
 unsigned int CRouterDlg::TableCheck(LPVOID pParam){
 	CList<RoutingTable, RoutingTable&> *temp_route_table;

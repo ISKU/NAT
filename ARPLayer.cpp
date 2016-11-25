@@ -246,9 +246,10 @@ void CARPLayer::updateCacheTable()
 		mac.Format("%x-%x-%x-%x-%x-%x", entry.Mac_addr[0], entry.Mac_addr[1], entry.Mac_addr[2], entry.Mac_addr[3], entry.Mac_addr[4], entry.Mac_addr[5]);
 		(entry.cache_type == complete ? type.Format("Complete") : type.Format("Incomplete"));
 		time.Format("%d:%d",entry.cache_ttl/60, entry.cache_ttl%60);
-		routerDlg->ListBox_ARPCacheTable.InsertItem(i,ip);
-		routerDlg->ListBox_ARPCacheTable.SetItem(i,1,LVIF_TEXT,mac,0,0,0,NULL);
-		routerDlg->ListBox_ARPCacheTable.SetItem(i,2,LVIF_TEXT,type,0,0,0,NULL);
+		routerDlg->ListBox_ARPCacheTable.InsertItem(i,NULL);
+		routerDlg->ListBox_ARPCacheTable.SetItem(i,1,LVIF_TEXT,ip,0,0,0,NULL);
+		routerDlg->ListBox_ARPCacheTable.SetItem(i,2,LVIF_TEXT,mac,0,0,0,NULL);
+		routerDlg->ListBox_ARPCacheTable.SetItem(i,3,LVIF_TEXT,type,0,0,0,NULL);
 		//routerDlg->ListBox_ARPCacheTable.SetItem(i,3,LVIF_TEXT,time,0,0,0,NULL);
 	}
 
