@@ -38,11 +38,11 @@ BOOL CARPLayer::Send(unsigned char* ppayload, int nlength, int dev_num)
 		}
 	}
 
-	if(memcmp(routerDlg->m_IPLayer->GetDstIP(dev_num), routerDlg->m_IPLayer->GetSrcIP(dev_num), 4) == 0) { //자신 ip로 보내는 경우
+	if(memcmp(routerDlg->m_IPLayer->GetDstIP(dev_num), routerDlg->GetSrcIP(dev_num), 4) == 0) { //자신 ip로 보내는 경우
 		arp_message.arp_op = request; //request message
-		memcpy(arp_message.arp_srcprotoaddr, routerDlg->m_IPLayer->GetSrcIP(dev_num), 4); //보내는 사람 ip
+		memcpy(arp_message.arp_srcprotoaddr, routerDlg->GetSrcIP(dev_num), 4); //보내는 사람 ip
 		memcpy(arp_message.arp_destprotoaddr, routerDlg->m_IPLayer->GetDstIP(dev_num), 4); //받는사람 ip
-		memcpy(arp_message.arp_srchaddr, routerDlg->m_EthernetLayer->GetSourceAddress(dev_num), 6); //보내는 사람 mac
+		memcpy(arp_message.arp_srchaddr, routerDlg->GetSrcMAC(dev_num), 6); //보내는 사람 mac
 		((CEthernetLayer*) this->mp_UnderLayer)->SetDestinAddress(ether_broad, dev_num);
 		return ((CEthernetLayer*) this->mp_UnderLayer)->Send((unsigned char *) &arp_message, ARP_MESSAGE_SIZE, arp_type, dev_num); //gratuitous arp message
 	}
@@ -61,7 +61,7 @@ BOOL CARPLayer::Send(unsigned char* ppayload, int nlength, int dev_num)
 	} //안비어 있다면 패킷을버림
 
 	arp_message.arp_op = request; //request message
-	memcpy(arp_message.arp_srcprotoaddr, routerDlg->m_IPLayer->GetSrcIP(dev_num), 4); //보내는 사람 ip
+	memcpy(arp_message.arp_srcprotoaddr, routerDlg->GetSrcIP(dev_num), 4); //보내는 사람 ip
 	memcpy(arp_message.arp_srchaddr, ((CEthernetLayer*) this->mp_UnderLayer)->GetSourceAddress(dev_num), 6); //보내는사람 mac
 	memcpy(arp_message.arp_destprotoaddr,routerDlg->m_IPLayer->GetDstIP(dev_num), 4); //받는사람 ip
 	//LP_arpDlg->SetTimer(wait_timer,4000,NULL); //timer 가동
@@ -80,7 +80,7 @@ BOOL CARPLayer::Receive(unsigned char* ppayload,int dev_num) {
 
 	int index;
 	if(receive_arp_message->arp_op == request) { //요구
-		if(memcmp(receive_arp_message->arp_destprotoaddr, routerDlg->m_IPLayer->GetSrcIP(dev_num), 4)) { // 내 ip가 아닌데 올 경우
+		if(memcmp(receive_arp_message->arp_destprotoaddr, routerDlg->GetSrcIP(dev_num), 4)) { // 내 ip가 아닌데 올 경우
 			if((index = SearchIpAtTable(receive_arp_message->arp_srcprotoaddr)) != -1) { //cache table에 존재할 경우 갱신, 그리고 Reply 보내지 않음
 				//해당 entry를 찾아 값 수정
 				POSITION pos = Cache_Table.FindIndex(index);
@@ -101,11 +101,11 @@ BOOL CARPLayer::Receive(unsigned char* ppayload,int dev_num) {
 			}
 		}
 		else{ //자신의 ip로 온 경우 Update하고 Reply
-			if(memcmp(receive_arp_message->arp_srchaddr, routerDlg->m_EthernetLayer->GetSourceAddress(dev_num), 6) == 0)
+			if(memcmp(receive_arp_message->arp_srchaddr, routerDlg->GetSrcMAC(dev_num), 6) == 0)
 				return FALSE;	//자기자신 전송이므로 무시
 
 			// srcmac이 다른 컴퓨터일 경우
-			if(!memcmp(receive_arp_message->arp_srcprotoaddr, routerDlg->m_IPLayer->GetSrcIP(dev_num), 4)) //자신의 ip와 보내는 쪽 srcIP가 같은 경우 충돌
+			if(!memcmp(receive_arp_message->arp_srcprotoaddr, routerDlg->GetSrcIP(dev_num), 4)) //자신의 ip와 보내는 쪽 srcIP가 같은 경우 충돌
 				AfxMessageBox("IP충돌 입니다.", 0, 0);
 
 			if((index = SearchIpAtTable(receive_arp_message->arp_srcprotoaddr)) != -1) { //table에존재할 경우
@@ -130,8 +130,8 @@ BOOL CARPLayer::Receive(unsigned char* ppayload,int dev_num) {
 
 			// Send reply message
 			arp_message.arp_op = reply;
-			memcpy(arp_message.arp_srchaddr, routerDlg->m_EthernetLayer->GetSourceAddress(dev_num), 6); //보내는 사람mac주소
-			memcpy(arp_message.arp_srcprotoaddr, routerDlg->m_IPLayer->GetSrcIP(dev_num), 4); //보내는 사람ip주소
+			memcpy(arp_message.arp_srchaddr, routerDlg->GetSrcMAC(dev_num), 6); //보내는 사람mac주소
+			memcpy(arp_message.arp_srcprotoaddr, routerDlg->GetSrcIP(dev_num), 4); //보내는 사람ip주소
 			memcpy(arp_message.arp_desthdaddr, receive_arp_message->arp_srchaddr, 6); //mac주소
 			memcpy(arp_message.arp_destprotoaddr, receive_arp_message->arp_srcprotoaddr, 4); //ip주소
 			((CEthernetLayer*) this->mp_UnderLayer)->SetDestinAddress(receive_arp_message->arp_srchaddr, dev_num);
@@ -140,7 +140,7 @@ BOOL CARPLayer::Receive(unsigned char* ppayload,int dev_num) {
 
 		return TRUE;
 	} else if(receive_arp_message->arp_op == reply){ //응답
-		if(!memcmp(receive_arp_message->arp_srcprotoaddr,routerDlg->m_IPLayer->GetSrcIP(dev_num),4)) //자신의 ip = 발송자 ip의경우
+		if(!memcmp(receive_arp_message->arp_srcprotoaddr,routerDlg->GetSrcIP(dev_num),4)) //자신의 ip = 발송자 ip의경우
 			AfxMessageBox("Ip충돌입니다.",0,0);
 
 		else { //자신의 ip != 발송자 ip
