@@ -148,25 +148,25 @@ BOOL CRouterDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE); // 작은 아이콘을 설정합니다.
 
 	// ListBox에 초기 Colum을 삽입
-	ListBox_RoutingTable.InsertColumn(0, _T(" "), LVCFMT_CENTER, 25, -1);
-	ListBox_RoutingTable.InsertColumn(1,_T("Destination"),LVCFMT_CENTER, 115, -1);
-	ListBox_RoutingTable.InsertColumn(2,_T("Metric"),LVCFMT_CENTER, 70, -1);
-	ListBox_RoutingTable.InsertColumn(3,_T("Next Hop"),LVCFMT_CENTER, 115, -1);
-	ListBox_RoutingTable.InsertColumn(4,_T("Interface"),LVCFMT_CENTER, 70, -1);
-	ListBox_RoutingTable.InsertColumn(5,_T("Subnet Mask"),LVCFMT_CENTER, 115, -1);
-	ListBox_RoutingTable.InsertColumn(6,_T("Status"),LVCFMT_CENTER, 50, -1);
-	ListBox_RoutingTable.InsertColumn(7,_T("Time"),LVCFMT_CENTER, 50, -1);
+	ListBox_RoutingTable.InsertColumn(0, _T(""), LVCFMT_CENTER, 0, -1);
+	ListBox_RoutingTable.InsertColumn(1,_T("Inner address"),LVCFMT_CENTER, 150, -1);
+	ListBox_RoutingTable.InsertColumn(2,_T("Inner port"),LVCFMT_CENTER, 110, -1);
+	ListBox_RoutingTable.InsertColumn(3,_T("Outer address"),LVCFMT_CENTER, 150, -1);
+	ListBox_RoutingTable.InsertColumn(4,_T("Status"),LVCFMT_CENTER, 100, -1);
+	ListBox_RoutingTable.InsertColumn(5,_T("Time"),LVCFMT_CENTER, 103, -1);
 
-	ListBox_ARPCacheTable.InsertColumn(0,_T("IP address"),LVCFMT_CENTER,100,-1);
-	ListBox_ARPCacheTable.InsertColumn(1,_T("Mac address"),LVCFMT_CENTER,120,-1);
-	ListBox_ARPCacheTable.InsertColumn(2,_T("Type"),LVCFMT_CENTER,80,-1);
+	ListBox_ARPCacheTable.InsertColumn(0,_T(""),LVCFMT_CENTER,0,-1);
+	ListBox_ARPCacheTable.InsertColumn(1,_T("IP address"),LVCFMT_CENTER,180,-1);
+	ListBox_ARPCacheTable.InsertColumn(2,_T("Mac address"),LVCFMT_CENTER,180,-1);
+	ListBox_ARPCacheTable.InsertColumn(3,_T("Type"),LVCFMT_CENTER,102,-1);
 	//ListBox_ARPCacheTable.InsertColumn(3,_T("Time"),LVCFMT_CENTER,49,-1);
 
-	ListBox_ICMPTable.InsertColumn(0,_T("Inner address"),LVCFMT_CENTER,60,-1);
-	ListBox_ICMPTable.InsertColumn(1,_T("Outer address"),LVCFMT_CENTER,120,-1);
-	ListBox_ICMPTable.InsertColumn(2,_T("Identifier"),LVCFMT_CENTER,120,-1);
-	ListBox_ICMPTable.InsertColumn(3,_T("Sequence"),LVCFMT_CENTER,120,-1);
-	ListBox_ICMPTable.InsertColumn(4,_T("Time"),LVCFMT_CENTER,120,-1);
+	ListBox_ICMPTable.InsertColumn(0,_T(""),LVCFMT_CENTER,0,-1);
+	ListBox_ICMPTable.InsertColumn(1,_T("Inner address"),LVCFMT_CENTER,120,-1);
+	ListBox_ICMPTable.InsertColumn(2,_T("Outer address"),LVCFMT_CENTER,120,-1);
+	ListBox_ICMPTable.InsertColumn(3,_T("Identifier"),LVCFMT_CENTER,80,-1);
+	ListBox_ICMPTable.InsertColumn(4,_T("Seq #"),LVCFMT_CENTER,80,-1);
+	ListBox_ICMPTable.InsertColumn(5,_T("Time"),LVCFMT_CENTER,60,-1);
 
 	setNicList(); //NicList Setting
 	return TRUE; // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
