@@ -77,6 +77,10 @@ public:
 	CComboBox m_nic1;
 	CComboBox m_nic2;
 
+	/*내가추가*/
+	char * Devices1_ip;
+	char * Devices2_ip;
+
 	// NicList Set
 	void setNicList(void);
 	afx_msg void OnCbnSelchangeNic1Combo();

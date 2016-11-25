@@ -1,3 +1,4 @@
+#pragma comment( lib, "iphlpapi.lib" )
 #include "stdafx.h"
 #include "Router.h"
 #include "RouterDlg.h"
@@ -411,11 +412,97 @@ void CRouterDlg::UpdateRouteTable()
 void CRouterDlg::OnCbnSelchangeNic1Combo()
 {
 	// ip林家 汲沥
+	char DeviceName1[512];
+	m_nic1.GetLBText(m_nic1.GetCurSel() , DeviceName1);
+    int a_devnum=m_nic1.GetCurSel();
+	ULONG    ulBufferSize = 0;
+	PIP_ADAPTER_INFO pAdapter, pAdapterInfo = NULL;
+
+	if (GetAdaptersInfo(NULL, &ulBufferSize) == ERROR_BUFFER_OVERFLOW)
+	{
+		pAdapterInfo = (PIP_ADAPTER_INFO)new BYTE[ulBufferSize];
+		if (pAdapterInfo)
+		{
+			if (GetAdaptersInfo(pAdapterInfo, &ulBufferSize) == ERROR_SUCCESS)
+			{
+				pAdapter = pAdapterInfo;
+				for(int FindDeviceCount = 0 ; FindDeviceCount < a_devnum; FindDeviceCount++){
+					pAdapterInfo = pAdapterInfo->Next;
+				}
+				Devices1_ip =  pAdapterInfo->IpAddressList.IpAddress.String;
+			}
+		}
+	}
+
+	/*change char to byte */
+	char addr[4][5];
+    int k=0;
+    memset(addr, 0, 20);
+       
+    for(int i=0 ; i<4 ;i++)
+    {     
+		for(int j=0 ; 1 ; j++, k++)
+        {       
+			if( (Devices1_ip[k] == '.') || (Devices1_ip[k] == NULL) )
+            {      addr[i][j] = '\0';
+                   k++;
+                   break;
+            }
+			addr[i][j] = Devices1_ip[k];
+        }
+    }
+
+	BYTE b[4] = {atoi(addr[0]), atoi(addr[1]), atoi(addr[2]), atoi(addr[3]) };
+	m_nic1_ip.SetAddress(b[0], b[1], b[2], b[3]);
+   
 }
 
+
 void CRouterDlg::OnCbnSelchangeNic2Combo()
-{ 
+{
 	//ip 林家 汲沥
+	char DeviceName2[512];
+	m_nic2.GetLBText(m_nic2.GetCurSel() , DeviceName2);
+    int a_devnum=m_nic2.GetCurSel();
+	ULONG    ulBufferSize = 0;
+	PIP_ADAPTER_INFO pAdapter, pAdapterInfo = NULL;
+
+	if (GetAdaptersInfo(NULL, &ulBufferSize) == ERROR_BUFFER_OVERFLOW)
+	{
+		pAdapterInfo = (PIP_ADAPTER_INFO)new BYTE[ulBufferSize];
+		if (pAdapterInfo)
+		{
+			if (GetAdaptersInfo(pAdapterInfo, &ulBufferSize) == ERROR_SUCCESS)
+			{
+				pAdapter = pAdapterInfo;
+				for(int FindDeviceCount = 0 ; FindDeviceCount < a_devnum; FindDeviceCount++){
+					pAdapterInfo = pAdapterInfo->Next;
+				}
+				Devices2_ip =  pAdapterInfo->IpAddressList.IpAddress.String;
+			}
+		}
+	}
+
+	/*change char to byte */
+	char addr[4][5];
+    int k=0;
+    memset(addr, 0, 20);
+       
+    for(int i=0 ; i<4 ;i++)
+    {     
+		for(int j=0 ; 1 ; j++, k++)
+        {       
+			if( (Devices2_ip[k] == '.') || (Devices2_ip[k] == NULL) )
+            {      addr[i][j] = '\0';
+                   k++;
+                   break;
+            }
+			addr[i][j] = Devices2_ip[k];
+        }
+    }
+
+	BYTE b[4] = {atoi(addr[0]), atoi(addr[1]), atoi(addr[2]), atoi(addr[3]) };
+	m_nic2_ip.SetAddress(b[0], b[1], b[2], b[3]);
 }
 
 void CRouterDlg::OnLvnItemchangedRoutingTable(NMHDR *pNMHDR, LRESULT *pResult)
