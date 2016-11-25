@@ -22,16 +22,18 @@ BOOL CICMPLayer::Receive(unsigned char* ppayload, int dev_num) {
 	CRouterDlg* routerDlg = ((CRouterDlg*) GetUpperLayer(0));
 
 	if (dev_num == DEV_PUBLIC) { //incoming packet
-		if (int index = searchTable(pFrame->Icmp_identifier, pFrame->Icmp_sequenceNumber) != -1) {
-			Icmp_table.GetAt(Icmp_table.FindIndex(index)).time = 0;
+		int index = searchTable(ntohs(pFrame->Icmp_identifier), ntohs(pFrame->Icmp_sequenceNumber));
+		if (index != -1) {
+			ICMP_ENTRY entry = Icmp_table.GetAt(Icmp_table.FindIndex(index));
+			entry.time = 0;
+			Icmp_table.SetAt(Icmp_table.FindIndex(index), entry);
 			routerDlg->m_IPLayer->SetDstPacketIP(Icmp_table.GetAt(Icmp_table.FindIndex(index)).inner_addr);
-			//리스트에 존재하는 IP로 private network에 전송
 			routerDlg->m_IPLayer->Send(ppayload, ICMP_HEADER_SIZE+ICMP_MAX_DATA, DEV_PRIVATE);
 		}
 	}
 
 	if (dev_num == DEV_PRIVATE) { //outgoing packet
-		if (int index = searchTable(pFrame->Icmp_identifier, pFrame->Icmp_sequenceNumber) == -1) {
+		if (searchTable(pFrame->Icmp_identifier, pFrame->Icmp_sequenceNumber) == -1) {
 			ICMP_ENTRY entry;
 			entry.identifier = ntohs(pFrame->Icmp_identifier);
 			memcpy(entry.inner_addr, routerDlg->m_IPLayer->GetSrcFromPacket(), 4);
@@ -50,16 +52,10 @@ BOOL CICMPLayer::Receive(unsigned char* ppayload, int dev_num) {
 
 int CICMPLayer::searchTable(unsigned short identifier, unsigned short sequenceNumber) {
 	ICMP_ENTRY entry;
-	int size = Icmp_table.GetCount();
-	unsigned short id;
-	unsigned short sequence;
 
-	for(int index = 0; index < size; index++) {
+	for(int index = 0; index < Icmp_table.GetCount(); index++) {
 		entry = Icmp_table.GetAt(Icmp_table.FindIndex(index));
-		id = entry.identifier;
-		sequence = entry.sequenceNumber;
-
-		if (id == identifier && sequence == sequenceNumber) 
+		if (entry.identifier == identifier && entry.sequenceNumber == sequenceNumber) 
 			return index;
 	}
 	return -1;
@@ -105,7 +101,7 @@ unsigned int CICMPLayer::IcmpTableCheck(LPVOID pParam) {
 		}
 
 		((CICMPLayer*)pParam)->UpdateTable();
-		Sleep(2000);
+		Sleep(5000);
 	}
 
 	return 0;

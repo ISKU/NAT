@@ -27,10 +27,10 @@ BOOL CARPLayer::Send(unsigned char* ppayload, int nlength, int dev_num)
 	memset(broadcast,0xff,4);
 	memset(ether_broad,0xff,6);
 
-	if(memcmp(routerDlg->m_IPLayer->GetDstIP(dev_num), broadcast, 4) == 0) //broadcast일 경우 바로 보냄
+	if(memcmp(routerDlg->m_IPLayer->GetDstFromPacket(), broadcast, 4) == 0) //broadcast일 경우 바로 보냄
 		return ((CEthernetLayer*) this->mp_UnderLayer)->Send(ppayload,nlength, ip_type, dev_num);
 
-	if((index = SearchIpAtTable(routerDlg->m_IPLayer->GetDstIP(dev_num))) != -1) { //search 결과 존재하는경우
+	if((index = SearchIpAtTable(routerDlg->m_IPLayer->GetDstFromPacket())) != -1) { //search 결과 존재하는경우
 		POSITION pos = Cache_Table.FindIndex(index);
 		if(Cache_Table.GetAt(pos).cache_type == complete) { //해당 결과가 complete일 경우
 			((CEthernetLayer*) this->mp_UnderLayer)->SetDestinAddress(Cache_Table.GetAt(pos).Mac_addr, dev_num); //해당 mac을 설정
@@ -38,10 +38,10 @@ BOOL CARPLayer::Send(unsigned char* ppayload, int nlength, int dev_num)
 		}
 	}
 
-	if(memcmp(routerDlg->m_IPLayer->GetDstIP(dev_num), routerDlg->GetSrcIP(dev_num), 4) == 0) { //자신 ip로 보내는 경우
+	if(memcmp(routerDlg->m_IPLayer->GetDstFromPacket(), routerDlg->GetSrcIP(dev_num), 4) == 0) { //자신 ip로 보내는 경우
 		arp_message.arp_op = request; //request message
 		memcpy(arp_message.arp_srcprotoaddr, routerDlg->GetSrcIP(dev_num), 4); //보내는 사람 ip
-		memcpy(arp_message.arp_destprotoaddr, routerDlg->m_IPLayer->GetDstIP(dev_num), 4); //받는사람 ip
+		memcpy(arp_message.arp_destprotoaddr, routerDlg->m_IPLayer->GetDstFromPacket(), 4); //받는사람 ip
 		memcpy(arp_message.arp_srchaddr, routerDlg->GetSrcMAC(dev_num), 6); //보내는 사람 mac
 		((CEthernetLayer*) this->mp_UnderLayer)->SetDestinAddress(ether_broad, dev_num);
 		return ((CEthernetLayer*) this->mp_UnderLayer)->Send((unsigned char *) &arp_message, ARP_MESSAGE_SIZE, arp_type, dev_num); //gratuitous arp message
@@ -55,15 +55,15 @@ BOOL CARPLayer::Send(unsigned char* ppayload, int nlength, int dev_num)
 		memcpy(buf[buf_index].data, ppayload, nlength); //패킷 저장
 		buf[buf_index].dev_num = dev_num;
 		buf[buf_index].nlength = nlength;
-		memcpy(buf[buf_index].dest_ip, routerDlg->m_IPLayer->GetDstIP(dev_num), 4);
+		memcpy(buf[buf_index].dest_ip, routerDlg->m_IPLayer->GetDstFromPacket(), 4);
 		buf_index++;
 		buf_index %= 2; //Circular 버퍼
 	} //안비어 있다면 패킷을버림
 
 	arp_message.arp_op = request; //request message
 	memcpy(arp_message.arp_srcprotoaddr, routerDlg->GetSrcIP(dev_num), 4); //보내는 사람 ip
-	memcpy(arp_message.arp_srchaddr, ((CEthernetLayer*) this->mp_UnderLayer)->GetSourceAddress(dev_num), 6); //보내는사람 mac
-	memcpy(arp_message.arp_destprotoaddr,routerDlg->m_IPLayer->GetDstIP(dev_num), 4); //받는사람 ip
+	memcpy(arp_message.arp_srchaddr, routerDlg->GetSrcMAC(dev_num), 6); //보내는사람 mac
+	memcpy(arp_message.arp_destprotoaddr,routerDlg->m_IPLayer->GetDstFromPacket(), 4); //받는사람 ip
 	//LP_arpDlg->SetTimer(wait_timer,4000,NULL); //timer 가동
 	((CEthernetLayer*) this->mp_UnderLayer)->SetDestinAddress(ether_broad, dev_num);
 	return ((CEthernetLayer*)this->mp_UnderLayer)->Send((unsigned char *) &arp_message, ARP_MESSAGE_SIZE, arp_type, dev_num); //arp message

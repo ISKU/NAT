@@ -119,6 +119,5 @@ BOOL CEthernetLayer::Send(unsigned char* ppayload, int nlength, unsigned short t
 	else if (Ethernet_Header.Ethernet_type == ip_type)
 		mp_UnderLayer->Send((unsigned char*) &Ethernet_Header, nlength + ETHERNET_HEADER_SIZE, dev_num);
 
-	// NILayer에 data를 보내는 부분.
-	return GetUnderLayer()->Send((unsigned char *) &Ethernet_Header, nlength + ETHERNET_HEADER_SIZE, dev_num);
+	return true;
 }
