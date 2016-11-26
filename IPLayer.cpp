@@ -84,11 +84,9 @@ BOOL CIPLayer::IsValidChecksum(unsigned char* p_header, unsigned short checksum)
 
 BOOL CIPLayer::Send(unsigned char* ppayload, int nlength, int dev_num)
 {
-	unsigned char broadcast[6] = { 0xff, 0xff, 0xff , 0xff , 0x11, 0x22};
 	CRouterDlg* routerDlg = ((CRouterDlg *) (GetUpperLayer(0)->GetUpperLayer(0)));
 	receivedPacket->Ip_checksum = htons(SetChecksum((unsigned char*) receivedPacket));
-	routerDlg->m_EthernetLayer->SetDestinAddress(broadcast, dev_num);
-	BOOL bSuccess = routerDlg->m_EthernetLayer->Send((unsigned char*) receivedPacket, (int) ntohs(receivedPacket->Ip_len), 0x0008, dev_num);
+	BOOL bSuccess = GetUnderLayer()->Send((unsigned char*) receivedPacket, (int) ntohs(receivedPacket->Ip_len), dev_num);
 	return bSuccess;
 }
 

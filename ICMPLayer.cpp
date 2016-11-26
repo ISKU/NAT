@@ -1,9 +1,12 @@
+#include "StdAfx.h"
 #include "stdafx.h"
 #include "ICMPLayer.h"
 #include "RouterDlg.h"
 
+CList<CICMPLayer::ICMP_ENTRY, CICMPLayer::ICMP_ENTRY&> CICMPLayer::Icmp_table;
+
 CICMPLayer::CICMPLayer(char* pName) : CBaseLayer(pName) 
-{ 
+{
 }
 
 CICMPLayer::~CICMPLayer() 
@@ -19,24 +22,28 @@ BOOL CICMPLayer::Receive(unsigned char* ppayload, int dev_num) {
 	CRouterDlg* routerDlg = ((CRouterDlg*) GetUpperLayer(0));
 
 	if (dev_num == DEV_PUBLIC) { //incoming packet
-		if (int index = searchTable(pFrame->Icmp_identifier, pFrame->Icmp_sequenceNumber) != -1) {
+		int index = searchTable(ntohs(pFrame->Icmp_identifier), ntohs(pFrame->Icmp_sequenceNumber));
+		if (index != -1) {
+			ICMP_ENTRY entry = Icmp_table.GetAt(Icmp_table.FindIndex(index));
+			entry.time = 0;
+			Icmp_table.SetAt(Icmp_table.FindIndex(index), entry);
 			routerDlg->m_IPLayer->SetDstPacketIP(Icmp_table.GetAt(Icmp_table.FindIndex(index)).inner_addr);
-			//리스트에 존재하는 IP로 private network에 전송
 			routerDlg->m_IPLayer->Send(ppayload, ICMP_HEADER_SIZE+ICMP_MAX_DATA, DEV_PRIVATE);
 		}
 	}
 
 	if (dev_num == DEV_PRIVATE) { //outgoing packet
-		ICMP_ENTRY entry;
-		entry.identifier = ntohs(pFrame->Icmp_identifier);
-		memcpy(entry.inner_addr, routerDlg->m_IPLayer->GetSrcFromPacket(), 4);
-		memcpy(entry.outer_addr, routerDlg->m_IPLayer->GetDstFromPacket(), 4);
-		entry.sequenceNumber = ntohs(pFrame->Icmp_sequenceNumber);
-		entry.time = 5;
-		Icmp_table.AddTail(entry);
-
+		if (searchTable(pFrame->Icmp_identifier, pFrame->Icmp_sequenceNumber) == -1) {
+			ICMP_ENTRY entry;
+			entry.identifier = ntohs(pFrame->Icmp_identifier);
+			memcpy(entry.inner_addr, routerDlg->m_IPLayer->GetSrcFromPacket(), 4);
+			memcpy(entry.outer_addr, routerDlg->m_IPLayer->GetDstFromPacket(), 4);
+			entry.sequenceNumber = ntohs(pFrame->Icmp_sequenceNumber);
+			entry.time = 2;
+			Icmp_table.AddTail(entry);	
+		}
 		routerDlg->m_IPLayer->SetSrcPacketIP(routerDlg->GetSrcIP(DEV_PUBLIC));
-		routerDlg->m_IPLayer->Send(ppayload, ICMP_HEADER_SIZE+ICMP_MAX_DATA, DEV_PUBLIC);
+		routerDlg->m_IPLayer->Send(ppayload, ICMP_HEADER_SIZE+ICMP_MAX_DATA, DEV_PUBLIC);		
 	}
 
 	UpdateTable();
@@ -45,16 +52,10 @@ BOOL CICMPLayer::Receive(unsigned char* ppayload, int dev_num) {
 
 int CICMPLayer::searchTable(unsigned short identifier, unsigned short sequenceNumber) {
 	ICMP_ENTRY entry;
-	int size = Icmp_table.GetCount();
-	unsigned short id;
-	unsigned short sequence;
 
-	for(int index = 0; index < size; index++) {
+	for(int index = 0; index < Icmp_table.GetCount(); index++) {
 		entry = Icmp_table.GetAt(Icmp_table.FindIndex(index));
-		id = entry.identifier;
-		sequence = entry.sequenceNumber;
-
-		if (id == identifier && sequence == sequenceNumber) 
+		if (entry.identifier == identifier && entry.sequenceNumber == sequenceNumber) 
 			return index;
 	}
 	return -1;
@@ -76,12 +77,44 @@ void CICMPLayer::UpdateTable()
 		sequenceNumber.Format("%d", entry.sequenceNumber);
 		time.Format("%d", entry.time);
 
-		routerDlg->ListBox_ICMPTable.InsertItem(i, inner_addr);
-		routerDlg->ListBox_ICMPTable.SetItem(i, 1, LVIF_TEXT, outer_addr, 0, 0, 0, NULL);
-		routerDlg->ListBox_ICMPTable.SetItem(i, 2, LVIF_TEXT, identifier, 0, 0, 0, NULL);
-		routerDlg->ListBox_ICMPTable.SetItem(i, 3, LVIF_TEXT, sequenceNumber, 0, 0, 0, NULL);
-		routerDlg->ListBox_ICMPTable.SetItem(i, 4, LVIF_TEXT, time, 0, 0, 0, NULL);
+		routerDlg->ListBox_ICMPTable.InsertItem(i, NULL);
+		routerDlg->ListBox_ICMPTable.SetItem(i, 1, LVIF_TEXT, inner_addr, 0, 0, 0, NULL);
+		routerDlg->ListBox_ICMPTable.SetItem(i, 2, LVIF_TEXT, outer_addr, 0, 0, 0, NULL);
+		routerDlg->ListBox_ICMPTable.SetItem(i, 3, LVIF_TEXT, identifier, 0, 0, 0, NULL);
+		routerDlg->ListBox_ICMPTable.SetItem(i, 4, LVIF_TEXT, sequenceNumber, 0, 0, 0, NULL);
+		routerDlg->ListBox_ICMPTable.SetItem(i, 5, LVIF_TEXT, time, 0, 0, 0, NULL);
 	}
 
 	routerDlg->ListBox_ICMPTable.UpdateWindow();
+}
+
+unsigned int CICMPLayer::IcmpTableCheck(LPVOID pParam) {
+	ICMP_ENTRY entry;
+
+	while(1) {
+		for (int index = 0; index < Icmp_table.GetCount(); index++) {
+			entry = Icmp_table.GetAt(Icmp_table.FindIndex(index));
+
+			if (entry.time == 0) {
+				Icmp_table.RemoveAt(Icmp_table.FindIndex(index));
+				index--;
+			} else {
+				entry.time = entry.time - 1;
+				Icmp_table.SetAt(Icmp_table.FindIndex(index), entry);
+			}	
+		}
+
+		((CICMPLayer*)pParam)->UpdateTable();
+		Sleep(5000);
+	}
+
+	return 0;
+}
+
+void CICMPLayer::StartReadThread()
+{
+	pThread_1 = AfxBeginThread(IcmpTableCheck, this);
+
+	if(pThread_1 == NULL)
+		AfxMessageBox("Read 쓰레드 생성 실패");
 }
