@@ -45,7 +45,7 @@ public:
 private:
 	inline void		ResetHeader();
 	void			ResetPseudoHeader();
-	int IncomingSearchTable(char inner_addr[4], unsigned short inner_port);
+	int IncomingSearchTable(unsigned char inner_addr[4], unsigned short inner_port);
 	int OutgoingSearchTable(unsigned short outer_port);
 	unsigned short dev_1_length;
 	unsigned short dev_2_length;
