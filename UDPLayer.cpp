@@ -81,21 +81,7 @@ BOOL CUDPLayer::IsValidChecksum(unsigned char* p_udpheader, unsigned short check
 
 BOOL CUDPLayer::Send(unsigned char* ppayload, int nlength, int dev_num)
 {
-	/*
-	CRouterDlg * routerDlg =  ((CRouterDlg *) GetUpperLayer(0));
-
-	memcpy(Udp_header.Udp_data, ppayload, nlength);
-	nlength = UDP_HEADER_SIZE + nlength;
-	routerDlg->m_IPLayer->SetProtocol(0x11, dev_num);
-
-	Udp_header.Udp_length = (unsigned short) htons(nlength);
-	SetSendPseudoHeader((unsigned short) htons(nlength), dev_num);
-	Udp_header.Udp_checksum = (unsigned short) htons(SetChecksum(nlength));
-
-	BOOL bSuccess = mp_UnderLayer->Send((unsigned char*)&Udp_header, nlength, dev_num);
-	*/
 	return true;
-	
 }
 
 BOOL CUDPLayer::Receive(unsigned char* ppayload, int dev_num)
@@ -108,7 +94,7 @@ BOOL CUDPLayer::Receive(unsigned char* ppayload, int dev_num)
 		return FALSE;
 
 	if (dev_num == DEV_PUBLIC) { // incoming packet
-		int index = SearchIncomingTable(receivedPacket->Udp_dstPort);
+		int index = SearchIncomingTable(ntohs(receivedPacket->Udp_dstPort));
 		if (index != -1) {
 			entry = CRouterDlg::nat_table.GetAt(CRouterDlg::nat_table.FindIndex(index));
 			
@@ -116,14 +102,14 @@ BOOL CUDPLayer::Receive(unsigned char* ppayload, int dev_num)
 			routerDlg->m_IPLayer->SetDstPacketIP(entry.inner_addr);
 
 			SetPseudoHeader(routerDlg->m_IPLayer->GetSrcFromPacket(), routerDlg->m_IPLayer->GetDstFromPacket(), receivedPacket->Udp_length);
-			receivedPacket->Udp_checksum = (unsigned short) htons(SetChecksum(receivedPacket->Udp_length));
+			receivedPacket->Udp_checksum = (unsigned short) htons(SetChecksum(ntohs(receivedPacket->Udp_length)));
 			routerDlg->m_IPLayer->Send(ppayload, UDP_HEADER_SIZE+UDP_MAX_DATA, DEV_PRIVATE);
 		} else 
 			return false;
 	}
 
 	if (dev_num == DEV_PRIVATE) { // outgoing packet
-		int index = SearchOutgoingTable(routerDlg->m_IPLayer->GetSrcFromPacket(), receivedPacket->Udp_srcPort);
+		int index = SearchOutgoingTable(routerDlg->m_IPLayer->GetSrcFromPacket(), ntohs(receivedPacket->Udp_srcPort));
 		if (index == -1) {
 			memcpy(entry.inner_addr, routerDlg->m_IPLayer->GetSrcFromPacket(), 4);
 			entry.inner_port = ntohs(receivedPacket->Udp_srcPort);
@@ -140,12 +126,12 @@ BOOL CUDPLayer::Receive(unsigned char* ppayload, int dev_num)
 			entry.time = 5;
 			CRouterDlg::nat_table.SetAt(CRouterDlg::nat_table.FindIndex(index), entry);
 
-			receivedPacket->Udp_srcPort = entry.outer_port;
+			receivedPacket->Udp_srcPort = htons(entry.outer_port);
 		}
 		
 		routerDlg->m_IPLayer->SetSrcPacketIP(routerDlg->GetSrcIP(DEV_PUBLIC));
 		SetPseudoHeader(routerDlg->m_IPLayer->GetSrcFromPacket(), routerDlg->m_IPLayer->GetDstFromPacket(), receivedPacket->Udp_length);
-		receivedPacket->Udp_checksum = (unsigned short) htons(SetChecksum(receivedPacket->Udp_length));
+		receivedPacket->Udp_checksum = (unsigned short) htons(SetChecksum(ntohs(receivedPacket->Udp_length)));
 		routerDlg->m_IPLayer->Send(ppayload, UDP_HEADER_SIZE+UDP_MAX_DATA, DEV_PUBLIC);
 	}
 

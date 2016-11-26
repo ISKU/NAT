@@ -43,6 +43,11 @@ void CIPLayer::SetDstPacketIP(unsigned char* ip)
 	memcpy(receivedPacket->Ip_dstAddressByte, ip, 4);
 }
 
+unsigned short CIPLayer::GetLength()
+{
+	return ntohs(receivedPacket->Ip_len) - ((receivedPacket->Ip_version & 0x0f) * 4);
+}
+
 unsigned short CIPLayer::SetChecksum(unsigned char p_header[20])
 {
 	unsigned short word;
@@ -112,12 +117,12 @@ BOOL CIPLayer::Receive(unsigned char* ppayload, int dev_num)
 	}
 	
 	if (receivedPacket->Ip_protocol == 0x06) { // tcp protocol (06) 확인
-//		((CTCPLayer*)GetUpperLayer(1))->SetReceivePseudoHeader(receivedPacket->Ip_srcAddressByte, receivedPacket->Ip_dstAddressByte, (unsigned short) htons(ntohs(receivedPacket->Ip_len) - IP_HEADER_SIZE));
+		((CTCPLayer*)GetUpperLayer(1))->SetPseudoHeader(receivedPacket->Ip_srcAddressByte, receivedPacket->Ip_dstAddressByte, (unsigned short) htons(GetLength()));
 		return GetUpperLayer(1)->Receive((unsigned char *)receivedPacket->Ip_data, dev_num);
 	}
 
 	if (receivedPacket->Ip_protocol == 0x11) { // udp protocol (17) 확인
-		((CUDPLayer*)GetUpperLayer(2))->SetPseudoHeader(receivedPacket->Ip_srcAddressByte, receivedPacket->Ip_dstAddressByte, (unsigned short) htons(ntohs(receivedPacket->Ip_len) - IP_HEADER_SIZE));
+		((CUDPLayer*)GetUpperLayer(2))->SetPseudoHeader(receivedPacket->Ip_srcAddressByte, receivedPacket->Ip_dstAddressByte, (unsigned short) htons(GetLength()));
 		return GetUpperLayer(2)->Receive((unsigned char *)receivedPacket->Ip_data, dev_num);
 	}
 

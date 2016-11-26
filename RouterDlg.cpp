@@ -302,7 +302,7 @@ void CRouterDlg::OnBnClickedNicSetButton()
 
 	m_NILayer->StartReadThread();	// receive Thread start
 	m_ICMPLayer->StartReadThread();
-	// StartReadThread(); // Router Table Thread Start
+	StartReadThread(); // Router Table Thread Start
 	GetDlgItem(IDC_NIC_SET_BUTTON)->EnableWindow(0);
 }
 
@@ -329,45 +329,36 @@ void CRouterDlg::setNicList(void)
 // UpdateRouteTable
 void CRouterDlg::UpdateNatTable()
 {
-	/*RoutingTable entry;
-	CString tableNumber, ipAddress, metric, out_interface, nexthop, subnetmask, status, time;
-	int size = route_table.GetCount();
+	NAT_ENTRY entry;
+	CString innerAddrees, innerPort, outerPort, status, time;
+	int size = nat_table.GetCount();
 
 	// dev_num으로 구분하여 interface에 해당하는 route_table을 사용하여 CList에 있는 entry를 모두 레이아웃에 추가한다!
-	ListBox_RoutingTable.DeleteAllItems();
+	ListBox_NatTable.DeleteAllItems();
 
 	for(int index = 0; index < size; index++) {
-		entry = route_table.GetAt(route_table.FindIndex(index));
+		entry = nat_table.GetAt(nat_table.FindIndex(index));
 
-		tableNumber.Format("%d", index + 1);
-		ipAddress.Format("%d.%d.%d.%d", entry.ipAddress[0], entry.ipAddress[1], entry.ipAddress[2], entry.ipAddress[3]);
-		metric.Format("%d", entry.metric);
-		out_interface.Format("%d", entry.out_interface);
-		nexthop.Format("%d.%d.%d.%d", entry.nexthop[0], entry.nexthop[1], entry.nexthop[2], entry.nexthop[3]);
-		subnetmask.Format("%d.%d.%d.%d", entry.subnetmask[0], entry.subnetmask[1], entry.subnetmask[2], entry.subnetmask[3]);
-		if (entry.status == 1) {
-			status = "연결됨";
-			time.Format("%d", entry.time);
-		} else if (entry.status == 2) {
-			status = "응답없음";
-			time.Format("%d", entry.time);
-		}
-		else {
-			status = "";
-			time = "";
-		}
+		innerAddrees.Format("%d.%d.%d.%d", entry.inner_addr[0], entry.inner_addr[1], entry.inner_addr[2], entry.inner_addr[3]);
+		innerPort.Format("%d", entry.inner_port);
+		outerPort.Format("%d", entry.outer_port);
 
-		ListBox_RoutingTable.InsertItem(index, tableNumber);
-		ListBox_RoutingTable.SetItem(index, 1, LVIF_TEXT, ipAddress, 0, 0, 0, NULL);
-		ListBox_RoutingTable.SetItem(index, 2, LVIF_TEXT, metric, 0, 0, 0, NULL);
-		ListBox_RoutingTable.SetItem(index, 3, LVIF_TEXT, nexthop, 0, 0, 0, NULL);
-		ListBox_RoutingTable.SetItem(index, 4, LVIF_TEXT, out_interface, 0, 0, 0, NULL);
-		ListBox_RoutingTable.SetItem(index, 5, LVIF_TEXT, subnetmask, 0, 0, 0, NULL);
-		ListBox_RoutingTable.SetItem(index, 6, LVIF_TEXT, status, 0, 0, 0, NULL);
-		ListBox_RoutingTable.SetItem(index, 7, LVIF_TEXT, time, 0, 0, 0, NULL);
+		if (entry.status == 10) {
+			status = "UDP";
+		} else {
+			status = "TCP";
+		}
+		time.Format("%d", entry.time);
+
+		ListBox_NatTable.InsertItem(index, NULL);
+		ListBox_NatTable.SetItem(index, 1, LVIF_TEXT, innerAddrees, 0, 0, 0, NULL);
+		ListBox_NatTable.SetItem(index, 2, LVIF_TEXT, innerPort, 0, 0, 0, NULL);
+		ListBox_NatTable.SetItem(index, 3, LVIF_TEXT, outerPort, 0, 0, 0, NULL);
+		ListBox_NatTable.SetItem(index, 4, LVIF_TEXT, status, 0, 0, 0, NULL);
+		ListBox_NatTable.SetItem(index, 5, LVIF_TEXT, time, 0, 0, 0, NULL);
 		
-		ListBox_RoutingTable.UpdateWindow();
-	}*/
+		ListBox_NatTable.UpdateWindow();
+	}
 }
 
 void CRouterDlg::OnCbnSelchangeNic1Combo()
@@ -498,36 +489,25 @@ void CRouterDlg::StartReadThread()
 
 
 unsigned int CRouterDlg::TableCheck(LPVOID pParam){
-	/*CList<RoutingTable, RoutingTable&> *temp_route_table;
-	RoutingTable entry;
+	NAT_ENTRY entry;
 
 	while(1) {
-		temp_route_table = &(((CRouterDlg*)pParam)->route_table);
-		for (int index = 0; index < temp_route_table->GetCount(); index++) {
-			entry = temp_route_table->GetAt(temp_route_table->FindIndex(index));
-			if (entry.status == 1) {
-				if (entry.time != 0)
-					entry.time = entry.time - 1;
-				else {
-					entry.status = 2;
-					entry.metric = 16;
-					entry.time = 5;
-				}
-				temp_route_table->SetAt(temp_route_table->FindIndex(index), entry);
-			} else if (entry.status == 2) {
-				if(entry.time != 0) {
-					entry.time = entry.time - 1;
-					temp_route_table->SetAt(temp_route_table->FindIndex(index), entry);
-				} else {
-					temp_route_table->RemoveAt(temp_route_table->FindIndex(index));
-					index--;
-				}
+		for (int index = 0; index < nat_table.GetCount(); index++) {
+			entry = nat_table.GetAt(nat_table.FindIndex(index));
+
+			if (entry.time != 0) {
+				entry.time = entry.time - 1;
+				nat_table.SetAt(nat_table.FindIndex(index), entry);
+			} else {
+				nat_table.RemoveAt(nat_table.FindIndex(index));
+				index--;
 			}
 		}
-		((CRouterDlg*)pParam)->UpdateRouteTable();
-		Sleep(10000);
+
+		((CRouterDlg*)pParam)->UpdateNatTable();
+		Sleep(1500);
 	}
-	*/
+	
 	return 0;
 }
 
