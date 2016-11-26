@@ -33,7 +33,7 @@ unsigned short CTCPLayer::SetChecksum(int nlength)
 	}
 
 	for(i = 0; i < nlength - (nlength % 2); i = i + 2){
-		if(i == 6) continue;
+		if(i == 16) continue;
 		word = ((p_tcpheader[i] << 8) & 0xFF00) + (p_tcpheader[i+1] & 0xFF);
 		sum = sum + (unsigned int) word;
 	}
@@ -62,7 +62,7 @@ BOOL CTCPLayer::IsValidChecksum(unsigned char* p_tcpheader, unsigned short check
 	}
 
 	for(i = 0; i < nlength - (nlength % 2); i = i + 2) {
-		if(i == 6) continue;
+		if(i == 16) continue;
 		word = ((p_tcpheader[i] << 8) & 0xFF00) + (p_tcpheader[i+1] & 0xFF);
 		sum = sum + (unsigned int) word;
 	}
@@ -90,7 +90,7 @@ BOOL CTCPLayer::Receive(unsigned char* ppayload, int dev_num)
 	CRouterDlg::NAT_ENTRY entry;
 	receivedPacket = (PTcpHeader) ppayload;
 
-	if ( !IsValidChecksum((unsigned char*) receivedPacket, ntohs(receivedPacket->Tcp_checksum), ntohs(routerDlg->m_IPLayer->GetLength()))) 
+	if ( !IsValidChecksum((unsigned char*) receivedPacket, ntohs(receivedPacket->Tcp_checksum), routerDlg->m_IPLayer->GetLength())) 
 		return FALSE;
 
 	if (dev_num == DEV_PUBLIC) { // incoming packet
@@ -102,7 +102,7 @@ BOOL CTCPLayer::Receive(unsigned char* ppayload, int dev_num)
 			routerDlg->m_IPLayer->SetDstPacketIP(entry.inner_addr);
 
 			SetPseudoHeader(routerDlg->m_IPLayer->GetSrcFromPacket(), routerDlg->m_IPLayer->GetDstFromPacket(), ntohs(routerDlg->m_IPLayer->GetLength()));
-			receivedPacket->Tcp_checksum = (unsigned short) htons(SetChecksum(ntohs(routerDlg->m_IPLayer->GetLength())));
+			receivedPacket->Tcp_checksum = (unsigned short) htons(SetChecksum(routerDlg->m_IPLayer->GetLength()));
 			routerDlg->m_IPLayer->Send(ppayload, TCP_HEADER_SIZE+TCP_MAX_DATA, DEV_PRIVATE);
 		} else 
 			return false;
@@ -115,7 +115,7 @@ BOOL CTCPLayer::Receive(unsigned char* ppayload, int dev_num)
 			entry.inner_port = ntohs(receivedPacket->Tcp_srcPort);
 			entry.outer_port = circularIndex + 49152;
 			entry.status = 5;
-			entry.time = 5;
+			entry.time = 15;
 
 			CRouterDlg::nat_table.AddTail(entry);
 
@@ -131,7 +131,7 @@ BOOL CTCPLayer::Receive(unsigned char* ppayload, int dev_num)
 		
 		routerDlg->m_IPLayer->SetSrcPacketIP(routerDlg->GetSrcIP(DEV_PUBLIC));
 		SetPseudoHeader(routerDlg->m_IPLayer->GetSrcFromPacket(), routerDlg->m_IPLayer->GetDstFromPacket(), ntohs(routerDlg->m_IPLayer->GetLength()));
-		receivedPacket->Tcp_checksum = (unsigned short) htons(SetChecksum(ntohs(routerDlg->m_IPLayer->GetLength())));
+		receivedPacket->Tcp_checksum = (unsigned short) htons(SetChecksum(routerDlg->m_IPLayer->GetLength()));
 		routerDlg->m_IPLayer->Send(ppayload, TCP_HEADER_SIZE+TCP_MAX_DATA, DEV_PUBLIC);
 	}
 
