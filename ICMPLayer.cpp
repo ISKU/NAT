@@ -39,7 +39,7 @@ BOOL CICMPLayer::Receive(unsigned char* ppayload, int dev_num) {
 			memcpy(entry.inner_addr, routerDlg->m_IPLayer->GetSrcFromPacket(), 4);
 			memcpy(entry.outer_addr, routerDlg->m_IPLayer->GetDstFromPacket(), 4);
 			entry.sequenceNumber = ntohs(pFrame->Icmp_sequenceNumber);
-			entry.time = 1;
+			entry.time = 2;
 			Icmp_table.AddTail(entry);	
 		}
 		routerDlg->m_IPLayer->SetSrcPacketIP(routerDlg->GetSrcIP(DEV_PUBLIC));
@@ -94,10 +94,14 @@ unsigned int CICMPLayer::IcmpTableCheck(LPVOID pParam) {
 	while(1) {
 		for (int index = 0; index < Icmp_table.GetCount(); index++) {
 			entry = Icmp_table.GetAt(Icmp_table.FindIndex(index));
+
 			if (entry.time == 0) {
 				Icmp_table.RemoveAt(Icmp_table.FindIndex(index));
 				index--;
-			}
+			} else {
+				entry.time = entry.time - 1;
+				Icmp_table.SetAt(Icmp_table.FindIndex(index), entry);
+			}	
 		}
 
 		((CICMPLayer*)pParam)->UpdateTable();
