@@ -23,7 +23,6 @@ public:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX); // DDX/DDV 지원입니다.
 
-protected:
 	HICON m_hIcon;
 
 	// 생성된 메시지 맵 함수
@@ -47,25 +46,21 @@ public: //layer
 	pcap_if_t *Device2;
 	CRoutTableAdder RtDlg;
 
-public: 
 	unsigned char *buf;
 	pcap_if_t *Devices_1; //interface 0
 	pcap_if_t *Devices_2; //interface 1
 
-	typedef struct _RoutingTable {
-		unsigned char ipAddress[4];
-		unsigned char subnetmask[4];
-		unsigned int metric;
-		unsigned char out_interface;
-		unsigned char nexthop[4];
+	typedef struct _TRANSPORT_ENTRY {
+		unsigned char inner_addr[4];
+		unsigned short inner_port;
+		unsigned short outer_port;
 		unsigned int status;
 		unsigned int time;
-	} RoutingTable, *RoutingTablePtr;
+	} NAT_ENTRY, *PNAT_ENTRY;
 
-	static CList<RoutingTable, RoutingTable&> route_table;
+	static CList<NAT_ENTRY, NAT_ENTRY&> nat_table;
 
-public:
-	CListCtrl ListBox_RoutingTable;
+	CListCtrl ListBox_NatTable;
 	CListCtrl ListBox_ARPCacheTable;
 	CListCtrl ListBox_ICMPTable;
 	afx_msg void OnBnClickedCacheDelete();
@@ -74,6 +69,8 @@ public:
 	afx_msg void OnBnClickedNicSetButton();
 	afx_msg void OnBnClickedRoutingAdd();
 	afx_msg void OnBnClickedRoutingDelete();
+	void setNicList(void);
+	void UpdateNatTable();
 	CComboBox m_nic1;
 	CComboBox m_nic2;
 
@@ -82,12 +79,7 @@ public:
 	char * Devices2_ip;
 
 	// NicList Set
-	void setNicList(void);
 	afx_msg void OnCbnSelchangeNic1Combo();
-	//void add_route_table(unsigned char ipAddress[4], unsigned int metric, unsigned char dstInterface[4]);
-
-	// UpdateRouteTable
-	void UpdateRouteTable();
 	afx_msg void OnCbnSelchangeNic2Combo();
 	CIPAddressCtrl m_nic1_ip;
 	CIPAddressCtrl m_nic2_ip;

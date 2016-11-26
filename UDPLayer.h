@@ -16,7 +16,7 @@ public:
 	void SetLength(unsigned short length, int dev_num);
 	void SetLengthForRIP(unsigned short length, int dev_num);
 	void SetSendPseudoHeader(unsigned short length, int dev_num);
-	void SetReceivePseudoHeader(unsigned char* srcIp, unsigned char* dstIp, unsigned short length);
+	void SetPseudoHeader(unsigned char* srcIp, unsigned char* dstIp, unsigned short length);
 	unsigned short SetChecksum(int nlength);
 	BOOL IsValidChecksum(unsigned char* p_header, unsigned short checksum, int nlength);
 
@@ -40,16 +40,18 @@ public:
 		unsigned short Pseudo_length;
 	} UdpPseudoHeader, *PUdpPseudoHeader;
 
-	UdpHeader Udp_header;
 	UdpPseudoHeader Udp_pseudo_header;
 
 private:
 	inline void		ResetHeader();
 	void			ResetPseudoHeader();
-
-private:
+	int SearchIncomingTable(unsigned short outer_port);
+	int SearchOutgoingTable(unsigned char inner_addr[4], unsigned short inner_port);
 	unsigned short dev_1_length;
 	unsigned short dev_2_length;
 	unsigned short dev_1_length_for_rip;
 	unsigned short dev_2_length_for_rip;
+
+	PUdpHeader receivedPacket;
+	int circularIndex;
 };

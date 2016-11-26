@@ -36,5 +36,5 @@ public:
 	CWinThread* pThread_1;
 	void StartReadThread();
 private:
-	int				searchTable(unsigned short identifier, unsigned short sequenceNumber);
+	int	searchTable(unsigned short identifier, unsigned short sequenceNumber);
 };
