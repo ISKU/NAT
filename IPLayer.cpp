@@ -117,7 +117,7 @@ BOOL CIPLayer::Receive(unsigned char* ppayload, int dev_num)
 	}
 
 	if (receivedPacket->Ip_protocol == 0x11) { // udp protocol (17) È®ÀÎ
-		((CUDPLayer*)GetUpperLayer(2))->SetReceivePseudoHeader(receivedPacket->Ip_srcAddressByte, receivedPacket->Ip_dstAddressByte, (unsigned short) htons(ntohs(receivedPacket->Ip_len) - IP_HEADER_SIZE));
+		((CUDPLayer*)GetUpperLayer(2))->SetPseudoHeader(receivedPacket->Ip_srcAddressByte, receivedPacket->Ip_dstAddressByte, (unsigned short) htons(ntohs(receivedPacket->Ip_len) - IP_HEADER_SIZE));
 		return GetUpperLayer(2)->Receive((unsigned char *)receivedPacket->Ip_data, dev_num);
 	}
 

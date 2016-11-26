@@ -527,8 +527,8 @@ unsigned int CRouterDlg::TableCheck(LPVOID pParam){
 		((CRouterDlg*)pParam)->UpdateRouteTable();
 		Sleep(10000);
 	}
-
-	return 0;*/
+	*/
+	return 0;
 }
 
 unsigned char* CRouterDlg::GetSrcIP(int dev_num)
