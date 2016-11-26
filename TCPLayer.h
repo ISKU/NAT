@@ -7,16 +7,7 @@ public:
 	CTCPLayer(char* pName = NULL);
 	virtual ~CTCPLayer();
 
-	unsigned short	GetDstPort();
-	unsigned short	GetSrcPort();
-	unsigned short	GetLength(int dev_num);
-	unsigned short	GetLengthForRIP(int dev_num);
-	void SetDstPort(unsigned short port);
-	void SetSrcPort(unsigned short port);
-	void SetLength(unsigned short length, int dev_num);
-	void SetLengthForRIP(unsigned short length, int dev_num);
-	void SetSendPseudoHeader(unsigned short length, int dev_num);
-	void SetReceivePseudoHeader(unsigned char* srcIp, unsigned char* dstIp, unsigned short length);
+	void SetPseudoHeader(unsigned char* srcIp, unsigned char* dstIp, unsigned short length);
 	unsigned short SetChecksum(int nlength);
 	BOOL IsValidChecksum(unsigned char* p_header, unsigned short checksum, int nlength);
 
@@ -45,16 +36,14 @@ public:
 		unsigned short Pseudo_length;
 	} TcpPseudoHeader, *PTcpPseudoHeader;
 
-	TcpHeader Tcp_header;
 	TcpPseudoHeader Tcp_pseudo_header;
 
-private:
-	inline void		ResetHeader();
-	void			ResetPseudoHeader();
 
 private:
-	unsigned short dev_1_length;
-	unsigned short dev_2_length;
-	unsigned short dev_1_length_for_rip;
-	unsigned short dev_2_length_for_rip;
+	void ResetPseudoHeader();
+	int SearchIncomingTable(unsigned short outer_port);
+	int SearchOutgoingTable(unsigned char inner_addr[4], unsigned short inner_port);
+
+	PTcpHeader receivedPacket;
+	int circularIndex;
 };

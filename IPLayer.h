@@ -16,6 +16,8 @@ public:
 	BOOL IsValidChecksum(unsigned char* received_header, unsigned short checksum);
 	void SetDstIP(unsigned char* ip, int dev_num);
 
+	unsigned short GetLength();
+
 	BOOL Send(unsigned char* ppayload, int nlength,int dev_num);
 	BOOL Receive(unsigned char* ppayload, int dev_num);
 
