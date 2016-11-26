@@ -84,7 +84,6 @@ void CUDPLayer::SetReceivePseudoHeader(unsigned char* srcIp, unsigned char* dstI
 unsigned short CUDPLayer::SetChecksum(int nlength) 
 {
 	unsigned char* p_pseudoheader = (unsigned char*) &Udp_pseudo_header;
-	unsigned char* p_udpheader = (unsigned char*) &Udp_header;
 	unsigned short word;
 	unsigned int sum = 0;
 	int i;

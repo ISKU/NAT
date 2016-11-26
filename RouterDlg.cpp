@@ -151,7 +151,7 @@ BOOL CRouterDlg::OnInitDialog()
 	ListBox_NatTable.InsertColumn(0, _T(""), LVCFMT_CENTER, 0, -1);
 	ListBox_NatTable.InsertColumn(1,_T("Inner address"),LVCFMT_CENTER, 150, -1);
 	ListBox_NatTable.InsertColumn(2,_T("Inner port"),LVCFMT_CENTER, 110, -1);
-	ListBox_NatTable.InsertColumn(3,_T("Outer address"),LVCFMT_CENTER, 150, -1);
+	ListBox_NatTable.InsertColumn(3,_T("Outer port"),LVCFMT_CENTER, 150, -1);
 	ListBox_NatTable.InsertColumn(4,_T("Status"),LVCFMT_CENTER, 100, -1);
 	ListBox_NatTable.InsertColumn(5,_T("Time"),LVCFMT_CENTER, 103, -1);
 

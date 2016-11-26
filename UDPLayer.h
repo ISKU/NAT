@@ -45,10 +45,12 @@ public:
 private:
 	inline void		ResetHeader();
 	void			ResetPseudoHeader();
-	int IncomingSearchTable(unsigned char inner_addr[4], unsigned short inner_port);
-	int OutgoingSearchTable(unsigned short outer_port);
+	int IncomingSearchTable(unsigned short outer_port);
+	int OutgoingSearchTable(unsigned char inner_addr[4], unsigned short inner_port);
 	unsigned short dev_1_length;
 	unsigned short dev_2_length;
 	unsigned short dev_1_length_for_rip;
 	unsigned short dev_2_length_for_rip;
+
+	PUdpHeader receivedPacket;
 };
