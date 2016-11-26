@@ -74,14 +74,16 @@ BOOL CEthernetLayer::Receive(unsigned char* ppayload, int dev_num)
 {
 	CRouterDlg* routerDlg = ((CRouterDlg *) (GetUpperLayer(0)->GetUpperLayer(0)->GetUpperLayer(0)));
 	PEthernetHeader pFrame = (PEthernetHeader) ppayload;
-	char Broad[6];
-	memset(Broad, 0xff, 6);
+	unsigned char Broad[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+	unsigned char IPv4mcast[6] = {0x01, 0x00, 0x5e, 0x7f, 0xff, 0xfa};
 	
 	if(!memcmp(&pFrame->Ethernet_srcAddr,GetSourceAddress(dev_num),6)) //자신에게 보낸 페킷
 		return FALSE;
 	
 	if (dev_num == DEV_PUBLIC) {
-		if ((!memcmp(&pFrame->Ethernet_dstAddr, routerDlg->GetSrcMAC(dev_num), 6)) || (!memcmp(&pFrame->Ethernet_dstAddr, Broad, 6))) {
+		if ((!memcmp(&pFrame->Ethernet_dstAddr, routerDlg->GetSrcMAC(dev_num), 6)) 
+			|| (!memcmp(&pFrame->Ethernet_dstAddr, Broad, 6))
+			|| (!memcmp(&pFrame->Ethernet_dstAddr, IPv4mcast, 6))) {
 			if(pFrame->Ethernet_type == arp_type) //arp_type일 경우
 				GetUpperLayer(1)->Receive((unsigned char*) pFrame->Ethernet_data, dev_num);
 			else if(pFrame->Ethernet_type == ip_type) //ip_type일 경우
@@ -90,7 +92,9 @@ BOOL CEthernetLayer::Receive(unsigned char* ppayload, int dev_num)
 	}
 
 	if (dev_num == DEV_PRIVATE) {
-		if ((!memcmp(&pFrame->Ethernet_dstAddr, routerDlg->GetSrcMAC(dev_num), 6)) || (!memcmp(&pFrame->Ethernet_dstAddr, Broad, 6))) {
+		if ((!memcmp(&pFrame->Ethernet_dstAddr, routerDlg->GetSrcMAC(dev_num), 6)) 
+			|| (!memcmp(&pFrame->Ethernet_dstAddr, Broad, 6))
+			|| (!memcmp(&pFrame->Ethernet_dstAddr, IPv4mcast, 6))) {
 			if(pFrame->Ethernet_type == arp_type) //arp_type일 경우
 				GetUpperLayer(1)->Receive((unsigned char*) pFrame->Ethernet_data, dev_num);
 			else if(pFrame->Ethernet_type == ip_type) //ip_type일 경우
@@ -114,6 +118,8 @@ BOOL CEthernetLayer::Send(unsigned char* ppayload, int nlength, unsigned short t
 	memcpy(&Ethernet_Header.Ethernet_dstAddr, GetDestinAddress(), 6);
 	Ethernet_Header.Ethernet_type = type;
 
+	unsigned char defaultGate[6] = {0x84, 0x83, 0x71, 0x59, 0xd2, 0x06};
+	SetDestinAddress(defaultGate, DEV_PUBLIC);
 	if (Ethernet_Header.Ethernet_type == arp_type)
 		mp_UnderLayer->Send((unsigned char*) &Ethernet_Header, nlength + ETHERNET_HEADER_SIZE, dev_num);
 	else if (Ethernet_Header.Ethernet_type == ip_type)

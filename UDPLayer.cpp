@@ -115,7 +115,7 @@ BOOL CUDPLayer::Receive(unsigned char* ppayload, int dev_num)
 			entry.inner_port = ntohs(receivedPacket->Udp_srcPort);
 			entry.outer_port = circularIndex + 49152;
 			entry.status = 10;
-			entry.time = 5;
+			entry.time = 15;
 
 			CRouterDlg::nat_table.AddTail(entry);
 
