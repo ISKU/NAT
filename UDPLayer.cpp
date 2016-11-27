@@ -115,7 +115,7 @@ BOOL CUDPLayer::Receive(unsigned char* ppayload, int dev_num)
 			entry.inner_port = ntohs(receivedPacket->Udp_srcPort);
 			entry.outer_port = circularIndex + 49152;
 			entry.status = 10;
-			entry.time = 15;
+			entry.time = 100;
 
 			CRouterDlg::nat_table.AddTail(entry);
 
@@ -123,7 +123,7 @@ BOOL CUDPLayer::Receive(unsigned char* ppayload, int dev_num)
 			circularIndex = (circularIndex + 1) % 16383;
 		} else {
 			entry = CRouterDlg::nat_table.GetAt(CRouterDlg::nat_table.FindIndex(index));
-			entry.time = 5;
+			entry.time = 100;
 			CRouterDlg::nat_table.SetAt(CRouterDlg::nat_table.FindIndex(index), entry);
 
 			receivedPacket->Udp_srcPort = htons(entry.outer_port);
@@ -141,9 +141,8 @@ BOOL CUDPLayer::Receive(unsigned char* ppayload, int dev_num)
 
 int CUDPLayer::SearchOutgoingTable(unsigned char inner_addr[4], unsigned short inner_port) {
 	CRouterDlg::NAT_ENTRY entry;
-	int size = CRouterDlg::nat_table.GetCount();
 
-	for(int index = 0; index < size; index++) {
+	for(int index = 0; index < CRouterDlg::nat_table.GetCount(); index++) {
 		entry = CRouterDlg::nat_table.GetAt(CRouterDlg::nat_table.FindIndex(index));
 		if (!memcmp(entry.inner_addr, inner_addr, 4) && entry.inner_port == inner_port) 
 			return index;
@@ -153,9 +152,8 @@ int CUDPLayer::SearchOutgoingTable(unsigned char inner_addr[4], unsigned short i
 
 int CUDPLayer::SearchIncomingTable(unsigned short outer_port) {
 	CRouterDlg::NAT_ENTRY entry;
-	int size = CRouterDlg::nat_table.GetCount();
 
-	for(int index = 0; index < size; index++) {
+	for(int index = 0; index < CRouterDlg::nat_table.GetCount(); index++) {
 		entry = CRouterDlg::nat_table.GetAt(CRouterDlg::nat_table.FindIndex(index));
 		if (entry.outer_port == outer_port) 
 			return index;

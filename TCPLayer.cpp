@@ -115,7 +115,7 @@ BOOL CTCPLayer::Receive(unsigned char* ppayload, int dev_num)
 			entry.inner_port = ntohs(receivedPacket->Tcp_srcPort);
 			entry.outer_port = circularIndex + 49152;
 			entry.status = 5;
-			entry.time = 15;
+			entry.time = 100;
 
 			CRouterDlg::nat_table.AddTail(entry);
 
@@ -123,7 +123,7 @@ BOOL CTCPLayer::Receive(unsigned char* ppayload, int dev_num)
 			circularIndex = (circularIndex + 1) % 16383;
 		} else {
 			entry = CRouterDlg::nat_table.GetAt(CRouterDlg::nat_table.FindIndex(index));
-			entry.time = 5;
+			entry.time = 100;
 			CRouterDlg::nat_table.SetAt(CRouterDlg::nat_table.FindIndex(index), entry);
 
 			receivedPacket->Tcp_srcPort = htons(entry.outer_port);
@@ -155,9 +155,8 @@ BOOL CTCPLayer::Receive(unsigned char* ppayload, int dev_num)
 
 int CTCPLayer::SearchOutgoingTable(unsigned char inner_addr[4], unsigned short inner_port) {
 	CRouterDlg::NAT_ENTRY entry;
-	int size = CRouterDlg::nat_table.GetCount();
 
-	for(int index = 0; index < size; index++) {
+	for(int index = 0; index < CRouterDlg::nat_table.GetCount(); index++) {
 		entry = CRouterDlg::nat_table.GetAt(CRouterDlg::nat_table.FindIndex(index));
 		if (!memcmp(entry.inner_addr, inner_addr, 4) && entry.inner_port == inner_port) 
 			return index;
@@ -167,9 +166,8 @@ int CTCPLayer::SearchOutgoingTable(unsigned char inner_addr[4], unsigned short i
 
 int CTCPLayer::SearchIncomingTable(unsigned short outer_port) {
 	CRouterDlg::NAT_ENTRY entry;
-	int size = CRouterDlg::nat_table.GetCount();
 
-	for(int index = 0; index < size; index++) {
+	for(int index = 0; index < CRouterDlg::nat_table.GetCount(); index++) {
 		entry = CRouterDlg::nat_table.GetAt(CRouterDlg::nat_table.FindIndex(index));
 		if (entry.outer_port == outer_port) 
 			return index;
