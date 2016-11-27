@@ -331,12 +331,11 @@ void CRouterDlg::UpdateNatTable()
 {
 	NAT_ENTRY entry;
 	CString innerAddrees, innerPort, outerPort, status, time;
-	int size = nat_table.GetCount();
 
 	// dev_num으로 구분하여 interface에 해당하는 route_table을 사용하여 CList에 있는 entry를 모두 레이아웃에 추가한다!
 	ListBox_NatTable.DeleteAllItems();
 
-	for(int index = 0; index < size; index++) {
+	for(int index = 0; index < nat_table.GetCount(); index++) {
 		entry = nat_table.GetAt(nat_table.FindIndex(index));
 
 		innerAddrees.Format("%d.%d.%d.%d", entry.inner_addr[0], entry.inner_addr[1], entry.inner_addr[2], entry.inner_addr[3]);
