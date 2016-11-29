@@ -98,4 +98,9 @@ public: //layer
 	unsigned char private_IP[4];
 	unsigned char public_MAC[6];
 	unsigned char private_MAC[6];
+
+	int SearchIncomingTable(unsigned short outer_port);
+	int SearchOutgoingTable(unsigned char inner_addr[4], unsigned short inner_port);
+	int GetCircularIndex();
+	int circularIndex;
 };

@@ -34,10 +34,7 @@ public:
 	UdpPseudoHeader Udp_pseudo_header;
 
 private:
-	void			ResetPseudoHeader();
-	int SearchIncomingTable(unsigned short outer_port);
-	int SearchOutgoingTable(unsigned char inner_addr[4], unsigned short inner_port);
+	void ResetPseudoHeader();
 
 	PUdpHeader receivedPacket;
-	int circularIndex;
 };

@@ -5,7 +5,6 @@
 CUDPLayer::CUDPLayer(char* pName) : CBaseLayer(pName)
 {
 	ResetPseudoHeader();
-	circularIndex = 0;
 }
 
 CUDPLayer::~CUDPLayer()
@@ -94,7 +93,7 @@ BOOL CUDPLayer::Receive(unsigned char* ppayload, int dev_num)
 		return FALSE;
 
 	if (dev_num == DEV_PUBLIC) { // incoming packet
-		int index = SearchIncomingTable(ntohs(receivedPacket->Udp_dstPort));
+		int index = routerDlg->SearchIncomingTable(ntohs(receivedPacket->Udp_dstPort));
 		if (index != -1) {
 			entry = CRouterDlg::nat_table.GetAt(CRouterDlg::nat_table.FindIndex(index));
 			
@@ -109,18 +108,16 @@ BOOL CUDPLayer::Receive(unsigned char* ppayload, int dev_num)
 	}
 
 	if (dev_num == DEV_PRIVATE) { // outgoing packet
-		int index = SearchOutgoingTable(routerDlg->m_IPLayer->GetSrcFromPacket(), ntohs(receivedPacket->Udp_srcPort));
+		int index = routerDlg->SearchOutgoingTable(routerDlg->m_IPLayer->GetSrcFromPacket(), ntohs(receivedPacket->Udp_srcPort));
 		if (index == -1) {
 			memcpy(entry.inner_addr, routerDlg->m_IPLayer->GetSrcFromPacket(), 4);
 			entry.inner_port = ntohs(receivedPacket->Udp_srcPort);
-			entry.outer_port = circularIndex + 49152;
+			entry.outer_port = routerDlg->GetCircularIndex();
 			entry.status = 10;
 			entry.time = 100;
 
 			CRouterDlg::nat_table.AddTail(entry);
-
-			receivedPacket->Udp_srcPort = htons(circularIndex + 49152);
-			circularIndex = (circularIndex + 1) % 16383;
+			receivedPacket->Udp_srcPort = htons(entry.outer_port);
 		} else {
 			entry = CRouterDlg::nat_table.GetAt(CRouterDlg::nat_table.FindIndex(index));
 			entry.time = 100;
@@ -137,28 +134,6 @@ BOOL CUDPLayer::Receive(unsigned char* ppayload, int dev_num)
 
 	routerDlg->UpdateNatTable();
 	return true;
-}
-
-int CUDPLayer::SearchOutgoingTable(unsigned char inner_addr[4], unsigned short inner_port) {
-	CRouterDlg::NAT_ENTRY entry;
-
-	for(int index = 0; index < CRouterDlg::nat_table.GetCount(); index++) {
-		entry = CRouterDlg::nat_table.GetAt(CRouterDlg::nat_table.FindIndex(index));
-		if (!memcmp(entry.inner_addr, inner_addr, 4) && entry.inner_port == inner_port) 
-			return index;
-	}
-	return -1;
-}
-
-int CUDPLayer::SearchIncomingTable(unsigned short outer_port) {
-	CRouterDlg::NAT_ENTRY entry;
-
-	for(int index = 0; index < CRouterDlg::nat_table.GetCount(); index++) {
-		entry = CRouterDlg::nat_table.GetAt(CRouterDlg::nat_table.FindIndex(index));
-		if (entry.outer_port == outer_port) 
-			return index;
-	}
-	return -1;
 }
 
 void CUDPLayer::ResetPseudoHeader()
