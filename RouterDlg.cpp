@@ -300,6 +300,7 @@ void CRouterDlg::OnBnClickedNicSetButton()
 	memcpy(public_MAC, OidData1->Data, 6);
 	memcpy(private_MAC, OidData2->Data, 6);
 
+	circularIndex = 0;
 	m_NILayer->StartReadThread();	// receive Thread start
 	m_ICMPLayer->StartReadThread();
 	StartReadThread(); // Router Table Thread Start
@@ -522,4 +523,33 @@ unsigned char* CRouterDlg::GetSrcMAC(int dev_num)
 	if (dev_num == DEV_PUBLIC)
 		return public_MAC;
 	return private_MAC;
+}
+
+int CRouterDlg::SearchOutgoingTable(unsigned char inner_addr[4], unsigned short inner_port) {
+	CRouterDlg::NAT_ENTRY entry;
+
+	for(int index = 0; index < CRouterDlg::nat_table.GetCount(); index++) {
+		entry = CRouterDlg::nat_table.GetAt(CRouterDlg::nat_table.FindIndex(index));
+		if (!memcmp(entry.inner_addr, inner_addr, 4) && entry.inner_port == inner_port) 
+			return index;
+	}
+	return -1;
+}
+
+int CRouterDlg::SearchIncomingTable(unsigned short outer_port) {
+	CRouterDlg::NAT_ENTRY entry;
+
+	for(int index = 0; index < CRouterDlg::nat_table.GetCount(); index++) {
+		entry = CRouterDlg::nat_table.GetAt(CRouterDlg::nat_table.FindIndex(index));
+		if (entry.outer_port == outer_port) 
+			return index;
+	}
+	return -1;
+}
+
+int CRouterDlg::GetCircularIndex() {
+	int index = circularIndex + 49152;
+	circularIndex = (circularIndex + 1) % 16383;
+
+	return index;
 }
