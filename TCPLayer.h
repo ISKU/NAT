@@ -41,9 +41,6 @@ public:
 
 private:
 	void ResetPseudoHeader();
-	int SearchIncomingTable(unsigned short outer_port);
-	int SearchOutgoingTable(unsigned char inner_addr[4], unsigned short inner_port);
 
 	PTcpHeader receivedPacket;
-	int circularIndex;
 };

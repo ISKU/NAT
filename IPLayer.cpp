@@ -91,9 +91,14 @@ BOOL CIPLayer::Send(unsigned char* ppayload, int nlength, int dev_num)
 {
 	CRouterDlg* routerDlg = ((CRouterDlg *) (GetUpperLayer(0)->GetUpperLayer(0)));
 	receivedPacket->Ip_checksum = htons(SetChecksum((unsigned char*) receivedPacket));
-	//BOOL bSuccess = GetUnderLayer()->Send((unsigned char*) receivedPacket, (int) ntohs(receivedPacket->Ip_len), dev_num);
-	BOOL bSuccess = routerDlg->m_EthernetLayer->Send((unsigned char*) receivedPacket, (int) ntohs(receivedPacket->Ip_len), 0x0008, dev_num);	
-	return bSuccess;
+
+	if (dev_num == DEV_PUBLIC)
+		routerDlg->m_EthernetLayer->Send((unsigned char*) receivedPacket, (int) ntohs(receivedPacket->Ip_len), 0x0008, dev_num);
+
+	if (dev_num == DEV_PRIVATE)
+		GetUnderLayer()->Send((unsigned char*) receivedPacket, (int) ntohs(receivedPacket->Ip_len), dev_num);
+
+	return true;
 }
 
 BOOL CIPLayer::Receive(unsigned char* ppayload, int dev_num)
@@ -113,18 +118,40 @@ BOOL CIPLayer::Receive(unsigned char* ppayload, int dev_num)
 	if(receivedPacket->Ip_timeToLive == 0 ) //ttl이 0일 경우 버림
       return FALSE;
 
-	if (receivedPacket->Ip_protocol == 0x01) { // icmp protocol (01) 확인
-		return GetUpperLayer(0)->Receive((unsigned char *)receivedPacket->Ip_data, dev_num);
-	}
+	if (dev_num == DEV_PUBLIC) {
+		if (!memcmp(receivedPacket->Ip_dstAddressByte, routerDlg->GetSrcIP(dev_num), 4)
+			|| !memcmp(receivedPacket->Ip_dstAddressByte, broadcast, 4) )  
+		{
+			if (receivedPacket->Ip_protocol == 0x01) { // icmp protocol (01) 확인
+				return GetUpperLayer(0)->Receive((unsigned char *)receivedPacket->Ip_data, dev_num);
+			}
 	
-	if (receivedPacket->Ip_protocol == 0x06) { // tcp protocol (06) 확인
-		((CTCPLayer*)GetUpperLayer(1))->SetPseudoHeader(receivedPacket->Ip_srcAddressByte, receivedPacket->Ip_dstAddressByte, (unsigned short) htons(GetLength()));
-		return GetUpperLayer(1)->Receive((unsigned char *)receivedPacket->Ip_data, dev_num);
+			if (receivedPacket->Ip_protocol == 0x06) { // tcp protocol (06) 확인
+				((CTCPLayer*)GetUpperLayer(1))->SetPseudoHeader(receivedPacket->Ip_srcAddressByte, receivedPacket->Ip_dstAddressByte, (unsigned short) htons(GetLength()));
+				return GetUpperLayer(1)->Receive((unsigned char *)receivedPacket->Ip_data, dev_num);
+			}
+
+			if (receivedPacket->Ip_protocol == 0x11) { // udp protocol (17) 확인
+				((CUDPLayer*)GetUpperLayer(2))->SetPseudoHeader(receivedPacket->Ip_srcAddressByte, receivedPacket->Ip_dstAddressByte, (unsigned short) htons(GetLength()));
+				return GetUpperLayer(2)->Receive((unsigned char *)receivedPacket->Ip_data, dev_num);
+			}
+		}
 	}
 
-	if (receivedPacket->Ip_protocol == 0x11) { // udp protocol (17) 확인
-		((CUDPLayer*)GetUpperLayer(2))->SetPseudoHeader(receivedPacket->Ip_srcAddressByte, receivedPacket->Ip_dstAddressByte, (unsigned short) htons(GetLength()));
-		return GetUpperLayer(2)->Receive((unsigned char *)receivedPacket->Ip_data, dev_num);
+	if (dev_num == DEV_PRIVATE) {
+		if (receivedPacket->Ip_protocol == 0x01) { // icmp protocol (01) 확인
+			return GetUpperLayer(0)->Receive((unsigned char *)receivedPacket->Ip_data, dev_num);
+		}
+	
+		if (receivedPacket->Ip_protocol == 0x06) { // tcp protocol (06) 확인
+			((CTCPLayer*)GetUpperLayer(1))->SetPseudoHeader(receivedPacket->Ip_srcAddressByte, receivedPacket->Ip_dstAddressByte, (unsigned short) htons(GetLength()));
+			return GetUpperLayer(1)->Receive((unsigned char *)receivedPacket->Ip_data, dev_num);
+		}
+
+		if (receivedPacket->Ip_protocol == 0x11) { // udp protocol (17) 확인
+			((CUDPLayer*)GetUpperLayer(2))->SetPseudoHeader(receivedPacket->Ip_srcAddressByte, receivedPacket->Ip_dstAddressByte, (unsigned short) htons(GetLength()));
+			return GetUpperLayer(2)->Receive((unsigned char *)receivedPacket->Ip_data, dev_num);
+		}
 	}
 
 	return FALSE;
