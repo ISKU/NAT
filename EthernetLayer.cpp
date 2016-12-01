@@ -118,13 +118,7 @@ BOOL CEthernetLayer::Send(unsigned char* ppayload, int nlength, unsigned short t
 	memcpy(Ethernet_Header.Ethernet_data, ppayload, nlength);
 	memcpy(&Ethernet_Header.Ethernet_srcAddr, routerDlg->GetSrcMAC(dev_num), 6);
 	Ethernet_Header.Ethernet_type = type;
-
 	unsigned char Broad[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-	unsigned char defaultGate[6] = {0x84, 0x83, 0x71, 0x59, 0xd2, 0x06};
-	unsigned char privateDefaultGate[6] = {0x44, 0xa8, 0x42, 0xf7, 0x95, 0x63};
-	
-	if (dev_num == DEV_PUBLIC)
-		memcpy(&Ethernet_Header.Ethernet_dstAddr, defaultGate, 6);
 
 	if (Ethernet_Header.Ethernet_type == arp_type)
 		mp_UnderLayer->Send((unsigned char*) &Ethernet_Header, nlength + ETHERNET_HEADER_SIZE, dev_num);

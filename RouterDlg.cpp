@@ -103,6 +103,7 @@ void CRouterDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_NIC2_COMBO, m_nic2);
 	DDX_Control(pDX, IDC_IPADDRESS1, m_nic1_ip);
 	DDX_Control(pDX, IDC_IPADDRESS2, m_nic2_ip);
+	DDX_Control(pDX, IDC_PUBLIC_DG, m_public_dg);
 }
 
 BEGIN_MESSAGE_MAP(CRouterDlg, CDialog)
@@ -118,6 +119,8 @@ BEGIN_MESSAGE_MAP(CRouterDlg, CDialog)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_ROUTING_TABLE, &CRouterDlg::OnLvnItemchangedRoutingTable)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_ROUTING_TABLE2, &CRouterDlg::OnLvnItemchangedRoutingTable2)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_ICMP_TABLE, &CRouterDlg::OnLvnItemchangedIcmpTable)
+	ON_STN_CLICKED(IDC_NIC3, &CRouterDlg::OnStnClickedNic3)
+	ON_NOTIFY(IPN_FIELDCHANGED, IDC_IPADDRESS3, &CRouterDlg::OnIpnFieldchangedIpaddress3)
 END_MESSAGE_MAP()
 
 // CRouterDlg 메시지 처리기
@@ -270,6 +273,7 @@ void CRouterDlg::OnBnClickedNicSetButton()
 
 	m_nic1.GetLBText(m_nic1.GetCurSel() , DeviceName1);	// 콤보 박스에 선택된 Device의 이름을 얻어옴
 	m_nic2.GetLBText(m_nic2.GetCurSel() , DeviceName2);
+
 	while(Devices != NULL) {
 		if(!strcmp(Devices->description,DeviceName1))
 			Device1 = Devices;
@@ -292,13 +296,16 @@ void CRouterDlg::OnBnClickedNicSetButton()
 	//ip주소 설정
 	unsigned char nic1_ip[4];
 	unsigned char nic2_ip[4];
+	unsigned char public_dg[4];
 	m_nic1_ip.GetAddress((BYTE &)nic1_ip[0],(BYTE &)nic1_ip[1],(BYTE &)nic1_ip[2],(BYTE &)nic1_ip[3]);
 	m_nic2_ip.GetAddress((BYTE &)nic2_ip[0],(BYTE &)nic2_ip[1],(BYTE &)nic2_ip[2],(BYTE &)nic2_ip[3]);
+	m_public_dg.GetAddress((BYTE &)public_dg[0],(BYTE &)public_dg[1],(BYTE &)public_dg[2],(BYTE &)public_dg[3]);
 
 	memcpy(public_IP, nic1_ip, 4);
 	memcpy(private_IP, nic2_ip, 4);
 	memcpy(public_MAC, OidData1->Data, 6);
 	memcpy(private_MAC, OidData2->Data, 6);
+	memcpy(public_dg_ip, public_dg, 4);
 
 	circularIndex = 0;
 	m_NILayer->StartReadThread();	// receive Thread start
@@ -327,7 +334,7 @@ void CRouterDlg::setNicList(void)
 	m_nic2.SetCurSel(1);
 }	
 
-// UpdateRouteTable
+// Update NAT Table
 void CRouterDlg::UpdateNatTable()
 {
 	NAT_ENTRY entry;
@@ -345,9 +352,12 @@ void CRouterDlg::UpdateNatTable()
 
 		if (entry.status == 10) {
 			status = "UDP";
+		} else if (entry.status == 15) {
+			status = "FIN";
 		} else {
 			status = "TCP";
 		}
+
 		time.Format("%d", entry.time);
 
 		ListBox_NatTable.InsertItem(index, NULL);
@@ -525,6 +535,11 @@ unsigned char* CRouterDlg::GetSrcMAC(int dev_num)
 	return private_MAC;
 }
 
+unsigned char* CRouterDlg::GetDefaultGateIP()
+{
+	return public_dg_ip;
+}
+
 int CRouterDlg::SearchOutgoingTable(unsigned char inner_addr[4], unsigned short inner_port) {
 	CRouterDlg::NAT_ENTRY entry;
 
@@ -552,4 +567,17 @@ int CRouterDlg::GetCircularIndex() {
 	circularIndex = (circularIndex + 1) % 16383;
 
 	return index;
+}
+
+void CRouterDlg::OnStnClickedNic3()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+}
+
+
+void CRouterDlg::OnIpnFieldchangedIpaddress3(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMIPADDRESS pIPAddr = reinterpret_cast<LPNMIPADDRESS>(pNMHDR);
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	*pResult = 0;
 }

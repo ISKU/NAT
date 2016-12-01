@@ -91,13 +91,7 @@ BOOL CIPLayer::Send(unsigned char* ppayload, int nlength, int dev_num)
 {
 	CRouterDlg* routerDlg = ((CRouterDlg *) (GetUpperLayer(0)->GetUpperLayer(0)));
 	receivedPacket->Ip_checksum = htons(SetChecksum((unsigned char*) receivedPacket));
-
-	if (dev_num == DEV_PUBLIC)
-		routerDlg->m_EthernetLayer->Send((unsigned char*) receivedPacket, (int) ntohs(receivedPacket->Ip_len), 0x0008, dev_num);
-
-	if (dev_num == DEV_PRIVATE)
-		GetUnderLayer()->Send((unsigned char*) receivedPacket, (int) ntohs(receivedPacket->Ip_len), dev_num);
-
+	GetUnderLayer()->Send((unsigned char*) receivedPacket, (int) ntohs(receivedPacket->Ip_len), dev_num);
 	return true;
 }
 

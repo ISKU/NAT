@@ -42,6 +42,8 @@
 #define IDC_METRIC_EDIT                 1023
 #define IDC_COMBO1                      1024
 #define IDC_IPADDRESS1                  1027
+#define IDC_IPADDRESS3                  1028
+#define IDC_PUBLIC_DG                   1028
 #define IDC_LIST3                       1029
 #define IDC_IPADDRESS2                  1030
 

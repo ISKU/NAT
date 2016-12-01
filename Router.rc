@@ -102,6 +102,8 @@ BEGIN
     CONTROL         "",IDC_IPADDRESS2,"SysIPAddress32",WS_TABSTOP,64,87,100,12
     LTEXT           "Public IP",IDC_NIC3,24,43,40,14
     LTEXT           "Private IP",IDC_NIC4,24,88,39,14
+    CONTROL         "",IDC_PUBLIC_DG,"SysIPAddress32",WS_TABSTOP,230,42,100,12
+    LTEXT           "Default Gateway",IDC_STATIC,171,44,53,8
 END
 
 IDD_ROUTE_ADD_DLG DIALOGEX 0, 0, 180, 154

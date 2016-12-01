@@ -96,7 +96,10 @@ BOOL CTCPLayer::Receive(unsigned char* ppayload, int dev_num)
 		int index = routerDlg->SearchIncomingTable(ntohs(receivedPacket->Tcp_dstPort));
 		if (index != -1) {
 			entry = CRouterDlg::nat_table.GetAt(CRouterDlg::nat_table.FindIndex(index));
-			
+
+			if (entry.status == 15) {
+				CRouterDlg::nat_table.RemoveAt(CRouterDlg::nat_table.FindIndex(index));
+			}
 			receivedPacket->Tcp_dstPort = htons(entry.inner_port);
 			routerDlg->m_IPLayer->SetDstPacketIP(entry.inner_addr);
 
@@ -121,8 +124,11 @@ BOOL CTCPLayer::Receive(unsigned char* ppayload, int dev_num)
 		} else {
 			entry = CRouterDlg::nat_table.GetAt(CRouterDlg::nat_table.FindIndex(index));
 			entry.time = 100;
-			CRouterDlg::nat_table.SetAt(CRouterDlg::nat_table.FindIndex(index), entry);
 
+			if ((receivedPacket->Tcp_flags & 0x01) == 0x01) // FIN
+				entry.status = 15;
+
+			CRouterDlg::nat_table.SetAt(CRouterDlg::nat_table.FindIndex(index), entry);
 			receivedPacket->Tcp_srcPort = htons(entry.outer_port);
 		}
 		
@@ -134,20 +140,6 @@ BOOL CTCPLayer::Receive(unsigned char* ppayload, int dev_num)
 
 	routerDlg->UpdateNatTable();
 	return true;
-
-	/*
-	if ((receivedPacket->Tcp_flags & 0x02) == 0x02) // SYN
-		;
-
-	if ((receivedPacket->Tcp_flags & 0x12) == 0x12) // SYN+ACK
-		;
-
-	if ((receivedPacket->Tcp_flags & 0x01) == 0x01) // FIN
-		;
-
-	if ((receivedPacket->Tcp_flags & 0x11) == 0x11) // FIN+ACK
-		;
-	*/
 }
 
 void CTCPLayer::ResetPseudoHeader()

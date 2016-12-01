@@ -74,7 +74,7 @@ public: //layer
 	CComboBox m_nic1;
 	CComboBox m_nic2;
 
-	/*내가추가*/
+	/*수진이가추가*/
 	char * Devices1_ip;
 	char * Devices2_ip;
 
@@ -83,6 +83,7 @@ public: //layer
 	afx_msg void OnCbnSelchangeNic2Combo();
 	CIPAddressCtrl m_nic1_ip;
 	CIPAddressCtrl m_nic2_ip;
+	CIPAddressCtrl m_public_dg;
 	afx_msg void OnLvnItemchangedRoutingTable(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnLvnItemchangedRoutingTable2(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnLvnItemchangedIcmpTable(NMHDR *pNMHDR, LRESULT *pResult);
@@ -93,14 +94,18 @@ public: //layer
 
 	unsigned char* GetSrcIP(int dev_num);
 	unsigned char* GetSrcMAC(int dev_num);
+	unsigned char* GetDefaultGateIP();
 
 	unsigned char public_IP[4];
 	unsigned char private_IP[4];
 	unsigned char public_MAC[6];
 	unsigned char private_MAC[6];
+	unsigned char public_dg_ip[4];
 
 	int SearchIncomingTable(unsigned short outer_port);
 	int SearchOutgoingTable(unsigned char inner_addr[4], unsigned short inner_port);
 	int GetCircularIndex();
 	int circularIndex;
+	afx_msg void OnStnClickedNic3();
+	afx_msg void OnIpnFieldchangedIpaddress3(NMHDR *pNMHDR, LRESULT *pResult);
 };

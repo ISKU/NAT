@@ -30,7 +30,13 @@ BOOL CARPLayer::Send(unsigned char* ppayload, int nlength, int dev_num)
 	if(memcmp(routerDlg->m_IPLayer->GetDstFromPacket(), broadcast, 4) == 0) //broadcast일 경우 바로 보냄
 		return ((CEthernetLayer*) this->mp_UnderLayer)->Send(ppayload,nlength, ip_type, dev_num);
 
-	if((index = SearchIpAtTable(routerDlg->m_IPLayer->GetDstFromPacket())) != -1) { //search 결과 존재하는경우
+	if (dev_num == DEV_PUBLIC && (index = SearchIpAtTable(routerDlg->GetDefaultGateIP())) != -1) {
+		POSITION pos = Cache_Table.FindIndex(index);
+		if(Cache_Table.GetAt(pos).cache_type == complete) { //해당 결과가 complete일 경우
+			((CEthernetLayer*) this->mp_UnderLayer)->SetDestinAddress(Cache_Table.GetAt(pos).Mac_addr, dev_num);
+			return ((CEthernetLayer*) this->mp_UnderLayer)->Send(ppayload, nlength, ip_type, dev_num);
+		}
+	} else if((index = SearchIpAtTable(routerDlg->m_IPLayer->GetDstFromPacket())) != -1) { //search 결과 존재하는경우
 		POSITION pos = Cache_Table.FindIndex(index);
 		if(Cache_Table.GetAt(pos).cache_type == complete) { //해당 결과가 complete일 경우
 			((CEthernetLayer*) this->mp_UnderLayer)->SetDestinAddress(Cache_Table.GetAt(pos).Mac_addr, dev_num); //해당 mac을 설정
